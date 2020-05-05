@@ -1,6 +1,15 @@
 #!/usr/bin/env python
 
+'''
+    This program is auto run on the pi in the following location:
+
+       "sudo nano /home/pi/.config/lxsession/LXDE-pi/autostart"
+
+'''
+
+
 import datetime, time, ast, sys, os
+
 from threading import Thread
 from subprocess import call, check_output
 import numpy as np
@@ -92,7 +101,7 @@ class Monitor(tk.Frame):
         self.notes_label = tk.Label(self, text="The brew steps will appear here\nonce a recipe is loaded please be\nsure to upload a '*.xml' file",font=controller.title_font)
         self.notes_label.place(x=250,y=80)
 
-        #  Button's
+        #  Buttons
         quit_btn = ttk.Button(self, text="   Quit   ",command=lambda: quit())
         quit_btn.place(x=650, y=400)
         browse_btn = ttk.Button(self, text="Browse",command=lambda: self.get_file_address())
@@ -185,19 +194,21 @@ class Monitor(tk.Frame):
             if str1 and str2:
                 print("OUT: ",str1, str2)
 
+                # get string data
+                line = line.split(">")
+                line = line[0].split("<")
+
+                # TODO - convert sting to data type needed
+                #
+
+                # Save to dictonary
+                recipe[str1,str2] = line
+
                 # reset the seoond string as this is the 2nd loop 
                 # ie a higher freq of changes.  
                 str2 = ''
 
-            # get string data
-            line = line.split(">")
-            line = line[0].split("<")
-
-            # TODO - convert sting to data type needed
-            #
-
-            # Save to dictonary
-            recipe[str1,str2] = line
+            
         
 
     def clock(self):
