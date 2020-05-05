@@ -92,7 +92,7 @@ class Monitor(tk.Frame):
         self.notes_label = tk.Label(self, text="The brew steps will appear here\nonce a recipe is loaded please be\nsure to upload a '*.xml' file",font=controller.title_font)
         self.notes_label.place(x=250,y=80)
 
-        #  Buttons
+        #  Button's
         quit_btn = ttk.Button(self, text="   Quit   ",command=lambda: quit())
         quit_btn.place(x=650, y=400)
         browse_btn = ttk.Button(self, text="Browse",command=lambda: self.get_file_address())
