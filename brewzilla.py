@@ -1,13 +1,5 @@
 #!/usr/bin/env python
 
-'''
-    This program is auto run on the pi in the following location:
-
-       "sudo nano /home/pi/.config/lxsession/LXDE-pi/autostart"
-
-'''
-
-
 import datetime, time, ast, sys, os
 
 from threading import Thread
@@ -165,10 +157,12 @@ class Monitor(tk.Frame):
 
         match_external = ['<RECIPE>','<HOP>','<MASH>','<MISC>','<YEAST>','<MASH_STEP>','<EQUIPMENT>']
 
+        match_string = ['<NAME>','<TYPE>','<USE>']
+
         # define variables
-        hop_count = mash_step = match = 0
+        hop_count = mash_step = match = ext_count = 0
         recipe = {}
-        str1 = str2 = ''
+        str1 = str2 = last_str1 = ''
 
         # open file from browser
         file = open(self.file_address[0])
@@ -181,35 +175,48 @@ class Monitor(tk.Frame):
 
                 # if found load name into memory
                 if ext_name in line:
-                    str1 = ext_name  
+                    last_str1 = str1
+                    str1 = ext_name 
+                    if str1 == last_str1:
+                        match = True
+                    else:
+                        match = False
+                        ext_count = 0 
+                    break
 
             # Check for an internal match:
             for int_name in match_internal:
 
                 # if found load name into memory
                 if int_name in line:
-                    str2 = int_name 
+                    str2 = int_name
+                    if (int_name == match_internal[0]) and match:
+                        ext_count =  ext_count + 1
+                    break
 
             # if both strings have data do something (print). 
             if str1 and str2:
-                print("OUT: ",str1, str2)
 
+                #print("OUT: ",str1+str(ext_count), str2)
                 # get string data
-                line = line.split(">")
-                line = line[0].split("<")
+                data = line.split(">")
+                data = data[1].split("<")
 
-                # TODO - convert sting to data type needed
-                #
+                if str2 not in match_string:
+                    print(str1)
+                    try:
+                        data = float(data[0])
+                    except ValueError:
+                        pass
 
                 # Save to dictonary
-                recipe[str1,str2] = line
+                recipe[str1+str(ext_count),str2] = data
 
                 # reset the seoond string as this is the 2nd loop 
                 # ie a higher freq of changes.  
                 str2 = ''
 
-            
-        
+        print(recipe)
 
     def clock(self):
         if self.clock.cget("text") != time.strftime('%H:%M:%S'):
