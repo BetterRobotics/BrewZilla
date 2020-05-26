@@ -131,7 +131,7 @@ class Monitor(tk.Frame):
     def get_file_address(self):
         rep = filedialog.askopenfilenames(
             parent=self.controller,
-            initialdir='/Users/thebunker/Desktop',
+            initialdir='',
             filetypes=[("XML", "*.xml")])
         self.file_address = rep
         time.sleep(0.1)
