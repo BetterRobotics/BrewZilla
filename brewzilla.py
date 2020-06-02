@@ -330,8 +330,7 @@ class Monitor(tk.Frame):
 
     def state_machine(self):
         #try:
-        
-        
+        self.read_data()
         # Manual Mode  
         if(not self.auto_flag):
             
