@@ -1,6 +1,6 @@
 BrewZilla Control 
 ==================
-The ultimate controller for your BrewZilla 3.0,3.1 and 3.1.1, it takes a recipe exported from your favorite beer brewing program and automatically, sets up the steps using a prompt to guide you along the way. Just export you favorite recipe in XML (I use beersmith 2), run the program from the directory, ```python brewzilla.py``` remember to upload and connect the arduino and setup the udev rule specified below. 
+The ultimate controller for your BrewZilla 3.0; 3.1; 3.1.1; it takes a recipe exported from your favorite beer brewing program and automatically, sets up the steps using a prompt to guide you along the way. Just export you favorite recipe in XML (I use beersmith 2), run the program from the directory, ```python brewzilla.py``` remember to upload and connect the arduino and setup the udev rule specified below. 
 
 The program's main features
 ----------------------------
