@@ -10,7 +10,7 @@ The program's main features
 - Auto/Manual functionality to allow you to take control for any reason
 - PID temperature control
 - Communication loss detection
-- Uses all existing hardware that comes with the brewzilla 3
+- Uses all existing hardware that comes with the brewzilla 3 with the addition of PI and Arduino
 
 
 
