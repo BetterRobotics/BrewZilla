@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
+
 import datetime, time, ast, sys, os
+import serial, struct
 
 from threading import Thread
 from subprocess import call, check_output
@@ -38,26 +40,20 @@ class BrewZilla(tk.Tk):
         self.config(bg="white")
         self.lift()
 
-        self.title_font = tkfont.Font(family='Helvetica', size=22, weight="bold", slant="italic")
-        self.list_font = tkfont.Font(family='Helvetica', size=12, weight="bold", slant="italic")
-        self.large_font = tkfont.Font(family='Helvetica', size=36, weight="bold", slant="italic")
-        self.msg_font = tkfont.Font(family='Helvetica', size=18, weight="bold", slant="italic")
+        self.title_font = tkfont.Font(size=22, weight="bold")
+        self.list_font = tkfont.Font(size=12, weight="bold")
+        self.large_font = tkfont.Font(size=36, weight="bold")
+        self.msg_font = tkfont.Font(size=14)
         
         container = tk.Frame(self)
         container.pack(side="top", fill="both", expand=True)
         container.grid_rowconfigure(0, weight=1)
         container.grid_columnconfigure(0, weight=1)
 
-
         frame = Monitor(parent=container, controller=self)
         frame.grid(row=0, column=0, sticky="nsew")
 
 
-    def second(self):
-        return int(time.time())
-
-    def hour(self):
-        return int(datetime.datetime.now().strftime("%H"))
 
 # this frame is the GUI and will be seen when the program runs
 class Monitor(tk.Frame):
@@ -65,8 +61,12 @@ class Monitor(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.controller = controller
         self.file_address = ''
-        self.count = self.step_temp = self.complete_flag = self.start_timer = self.temp = self.step_count = 0
+        self.count = self.complete_flag = self.set_timer=self.toggle=0
+        self.start_timer = self.set_temp = self.pause_timer =self.bzr = self.step_count = 0
         self.recipe = {}
+        self.lock = False
+        self.auto_flag = 1
+        self.temp = 5
 
         #for now this is a pretend setup for pi 
         try:
@@ -77,11 +77,17 @@ class Monitor(tk.Frame):
         except:
             pass
 
-        self.notes_label_text = "Welcome"
-        self.timer_label_text = "00:00:00"
-        self.temp_label_text =  "??"
-        self.notes_msg_text  =  "The brew steps will appear here, after a recipe is loaded please, be sure to upload an xml file"
-
+        self.notes_label_text = tk.StringVar()
+        self.timer_label_text = tk.StringVar()
+        self.temp_label_text = tk.StringVar()
+        self.notes_msg_text = tk.StringVar()
+        self.notes_label_text.set("Welcome")
+        self.timer_label_text.set("0:00:00")
+        self.temp_label_text.set("0c")
+        self.notes_msg_text.set("The brew steps will appear here, after a recipe is loaded please, be sure to upload an xml file")
+        
+        
+        # decode XML keys
         self.match_internal = ['<NAME>','<BOIL_TIME>','<OG>','<AMOUNT>','<USE>','<TIME>','<TYPE>','<PRODUCT_ID>',\
                                '<SPARGE_TEMP>','<STEP_TIME>','<STEP_TEMP>','<INFUSE_AMOUNT>','<INFUSE_TEMP>',\
                                '<BOIL_SIZE>', '<BATCH_SIZE>' , '<DESCRIPTION>', '<DISPLAY_TIME>']
@@ -92,46 +98,49 @@ class Monitor(tk.Frame):
 
         #  GUI layout setup
         #  labels
-        # monitor_label = tk.Label(self, text="BrewZilla", font=controller.large_font)
-        # monitor_label.place(x=80, y=20)
+        self.timer_label = tk.Label(self, textvariable=self.timer_label_text, font=controller.title_font)
+        self.timer_label.place(x=60,y=80)
+        self.temp_label = tk.Label(self, textvariable=self.temp_label_text, font=controller.title_font)
+        self.temp_label.place(x=100,y=150)
+        self.notes_label = tk.Label(self, textvariable=self.notes_label_text, font=controller.large_font)
+        self.notes_label.place(x=400, y=50, width=800, height=50, anchor='center')
+        self.notes_msg = tk.Label(self, textvariable=self.notes_msg_text, font=controller.msg_font, wrap=370, anchor='e', justify='left')
+        self.notes_msg.place(x=240,y=120)
+
         time_btn_label = tk.Label(self, text="Temp", font=controller.msg_font)
         time_btn_label.place(x=95,y=255)
         temp_btn_label = tk.Label(self, text="Time", font=controller.msg_font)
         temp_btn_label.place(x=95,y=325)
-
-        self.timer_label = tk.Label(self, text=self.timer_label_text, font=controller.large_font, width=8)
-        self.timer_label.place(x=40,y=80)
-        self.temp_label = tk.Label(self, text=self.temp_label_text+u"\u2103", font=controller.large_font)
-        self.temp_label.place(x=85,y=150)
-        self.notes_label = tk.Label(self, text=self.notes_label_text, font=controller.large_font, anchor='c')
-        self.notes_label.place(x=320,y=40)
-        self.notes_msg = tk.Message(self, text=self.notes_msg_text,font=controller.msg_font, width=370)
-        self.notes_msg.place(x=240,y=120)
+        
+        self.comms_label = tk.Label(self,text="COM OK" ,fg='red' ,font=controller.msg_font)
+        self.comms_label.place(x=80,y=440)
 
         #  Buttons
         quit_btn = ttk.Button(self, text="     Quit     ",command=lambda: self.quit())
         quit_btn.place(x=650, y=400)
-        browse_btn = ttk.Button(self, text="Load Recipe",command=lambda: self.get_file_address())
-        browse_btn.place(x=650, y=350)
+        self.browse_btn = ttk.Button(self, text="Load Recipe",command=lambda: self.get_file_address())
+        self.browse_btn.place(x=650, y=350)
         self.complete_btn = ttk.Button(self, text="Step Complete", state='disabled',command=lambda: self.complete())
         self.complete_btn.place(x=650, y=300)
         temp_p_btn = ttk.Button(self, text="    +    " , command=lambda: self.pos_temp())
         temp_p_btn.place(x=30, y=280)
         temp_n_btn = ttk.Button(self, text="    -    " ,command=lambda: self.neg_temp())
         temp_n_btn.place(x=130, y=280)
-        time_p_btn = ttk.Button(self, text="    +    " ,command=lambda: self.quit())
+        time_p_btn = ttk.Button(self, text="    +    " ,command=lambda: self.pos_timer())
         time_p_btn.place(x=30, y=350)
-        time_n_btn = ttk.Button(self, text="    -    " ,command=lambda: self.quit())
+        time_n_btn = ttk.Button(self, text="    -    " ,command=lambda: self.neg_timer())
         time_n_btn.place(x=130, y=350)
-        auto_man_btn = ttk.Button(self, text="Auto/Man" ,command=lambda: self.quit())
-        auto_man_btn.place(x=80, y=400)
-
-        self.update_labels()
+        self.auto_man_btn = ttk.Button(self, text="Manuel" ,width=8,command=lambda: self.auto_man())
+        self.auto_man_btn.place(x=80, y=400)
+    
+        # start loops
+        self.update_timer()
+        self.init_serial()
+        
 
     def get_file_address(self):
-        rep = filedialog.askopenfilenames(
-            parent=self.controller,
-            initialdir='',
+        rep = filedialog.askopenfilenames(parent=self.controller,
+            initialdir='/Users/thebunker/Desktop',
             filetypes=[("XML", "*.xml")])
         self.file_address = rep
         time.sleep(0.1)
@@ -142,7 +151,57 @@ class Monitor(tk.Frame):
 
     def complete(self):
         self.complete_flag = 1
+    
+    def init_serial(self):
+        try:
+            self.ser = serial.Serial("/dev/ARDUINO", 9600)
+            self.ser.reset_input_buffer()
+            self.heartbeat()
+             
+        except serial.SerialException:
+            print("Unexpected error:", sys.exc_info())
+    
+    def send_data(self, temp=0, bzr=0):
+        string = []
+        string.append('x')
+        inputVals = [int(temp),int(bzr)]
+        for num in inputVals:
+            string.append(struct.pack('>B', num))
+        string.append('y')
+        
+        try:
+            for packet in string:
+                self.ser.write(packet)
+        except:
+            self.ser.close()
+            self.init_serial()
+            
+    def read_data(self):
+        self.ser.flushInput()
+        try:
+            
+            data = self.ser.readline()
+            data = data.split("\r\n")[0].split(",")
+            if(data[0] == 'z'):
+                self.temp = int(data[1])
+        except:
+            print "Error readding coms", sys.exc_info()
+                            
+    
+    def heartbeat(self):
+        try:
+            string = ['x','h','b','t','y']
+            for packet in string:
+                self.ser.write(packet)
+                
+            self.comms_label.config(fg="green")
+        except:
+            self.comms_label.config(fg="red")
+            self.ser.close()
+            self.init_serial()
 
+        self.after(2000, self.heartbeat)
+        
     def get_sparge_volume(self):
         count = 0
         total_grains = 0
@@ -156,52 +215,78 @@ class Monitor(tk.Frame):
 
         return round(self.recipe['<RECIPE>0', '<BOIL_SIZE>'] - (self.recipe['<MASH_STEP>0', '<INFUSE_AMOUNT>']  - total_grains),2)
 
-        # print("Need to add", np.round(self.sparge_volume,2), "L for sparge")
-
-    def update_labels(self):
+    def update_timer(self):
         
-        if self.start_timer is not 0:
-             self.timer = round(time.time() - self.start_timer)
-             self.timer_label_text = str(self.timer)
-        else:
-            self.timer_label_text = 0
+        if self.start_timer >0:
+            if not self.pause_timer: 
+                self.timer = round(time.time() - self.start_timer)
+                self.timer_lab = datetime.timedelta(seconds=self.timer)
+                self.timer_label_text.set(str(self.timer_lab))
+        elif self.auto_flag:
+            self.timer_label_text.set("0:00:00")
             self.timer = 0
-        
-        self.timer_label.config(text=self.timer_label_text)
+        else:
+            if not self.toggle:
+                self.timer_lab = datetime.timedelta(seconds=self.set_timer)   
+                self.timer_label_text.set(str(self.timer_lab))
+            else:
+                self.timer_label_text.set("0:00:00")
+                self.timer = 0
 
-        self.temp_label.config(text=self.temp_label_text+u"\u2103")
-
-        self.notes_label.config(text=self.notes_label_text)
-
-        self.notes_msg.config(text=self.notes_msg_text)
-
-        self.after(200, self.update_labels)
+        self.after(250, self.update_timer)
 
     def pos_temp(self):
-        self.temp+= 1
+        self.set_temp+= 1
 
     def neg_temp(self):
-        self.temp-= 1
+        
+        self.set_temp-= 1
+        
+    def pos_timer(self):
+        self.set_timer+= 1
 
-    def read_temp(self):
-        return self.temp
-
-    def turn_on_heaters(self, temp=0):
-        return 0
-
-    def wait_for_temp(self, set_temp=0): 
-        temp = self.read_temp() 
-        self.temp_label_text = str(temp)
-        if (temp == set_temp):
+    def neg_timer(self):
+        self.set_timer-= 1
+        
+    def auto_man(self):
+        self.auto_flag = ~self.auto_flag&1
+        self.start_timer = 0
+        if(not self.auto_flag):
+            self.complete_btn.config(text="Play")
+            self.complete_btn.config(state='normal')
+            self.auto_man_btn.config(text="Auto")
+            self.notes_label_text.set("Manual Mode")
+            self.notes_msg_text.set('Set timer and temp, the timer will start once temp is reached')
+            self.set_temp = 0
+            self.set_timer = 0
+            self.state_machine()
+        else:
+            self.complete_btn.config(text="Step Complete")
+            self.auto_man_btn.config(text="Manual")
+            self.complete_btn.config(state='disabled')
+            self.count=0;
+        print (self.auto_flag)
+        
+    def wait_for_temp(self, temp=0): 
+        if (self.temp == temp):
             return True
-        self.after(1000, self.wait_for_temp)
+        return False
 
     def get_boil_additions(self):
         string = ''
         while 1:
             try:
-                string += self.recipe['<HOP>'+str(self.step_count),'<NAME>']+'\tAmount: '+str(self.recipe['<HOP>'+str(self.step_count),'<AMOUNT>'])+'\tTime: '+str(self.recipe['<HOP>'+str(self.step_count),'<TIME>'])+'\n'
+                a = self.recipe['<HOP>'+str(self.step_count),'<NAME>']
+                a_size = len(a)
+                b =str(self.recipe['<HOP>'+str(self.step_count),'<AMOUNT>']*1000.0)
+                c = 'g'+u'\u2000'+str(round(self.recipe['<HOP>'+str(self.step_count),'<TIME>']))+'mins'
+                x =''
+                rng = 20 - a_size
+                for i in range(rng):
+                    x +=u'\u2000'
+                string += a+x+b+c+"\n"
                 self.step_count += 1
+
             except KeyError:
                 self.step_count = 0
                 break
@@ -209,7 +294,16 @@ class Monitor(tk.Frame):
         while 1:
             try:
                 if self.recipe['<FERMENTABLE>'+str(self.step_count),'<TYPE>'] == "Sugar":
-                    string += self.recipe['<FERMENTABLE>'+str(self.step_count),'<NAME>']+'\tAmount: '+str(self.recipe['<FERMENTABLE>'+str(self.step_count),'<AMOUNT>'])+'\tTime: 10\n'
+                    a = self.recipe['<FERMENTABLE>'+str(self.step_count),'<NAME>']
+                    a_size = len(a)
+                    b = str(int(round(self.recipe['<FERMENTABLE>'+str(self.step_count),'<AMOUNT>'],3)*1000))
+                    c = 'g'+u'\u2000'+'10.0mins'
+                    x =''
+                    rng = 20 - a_size
+                    for i in range(rng):
+                        x +=u'\u2000'
+                    
+                    string += a+x+b+c+"\n"
                 self.step_count += 1
             except KeyError:
                 self.step_count = 0
@@ -217,48 +311,105 @@ class Monitor(tk.Frame):
 
         while 1:
             try:
-                string += self.recipe['<MISC>'+str(self.step_count),'<NAME>']+'\tAmount: '+str(self.recipe['<MISC>'+str(self.step_count),'<AMOUNT>'])+'\tTime: '+str(self.recipe['<MISC>'+str(self.step_count),'<TIME>'])+'\n'
+                a = self.recipe['<MISC>'+str(self.step_count),'<NAME>']
+                a_size = len(a)
+                b = str(round(self.recipe['<MISC>'+str(self.step_count),'<AMOUNT>'],3)*1000) 
+                c = 'g'+u'\u2000'+str(self.recipe['<MISC>'+str(self.step_count),'<TIME>'])+'mins'
+                x =''
+                rng = 20 - a_size
+                for i in range(rng):
+                    x +=u'\u2000'
+                
+                string += a+x+b+c+"\n"
                 self.step_count += 1
             except KeyError:
                 self.step_count = 0
                 break
-
+                
         return string
 
     def state_machine(self):
-        # self.count = 0
-        # add water and heat
-        if (self.count == 0):
-            self.notes_label_text = "Water"
-            self.notes_msg_text = 'Add '+str(self.recipe['<MASH_STEP>0','<INFUSE_AMOUNT>'])+'L of water, once added turn on the elements and press, Step Compelete'
-            if(self.complete_flag):
+        #try:
+        
+        
+        # Manual Mode  
+        if(not self.auto_flag):
+            
+            if (self.complete_flag):
                 self.complete_flag = False
-                self.notes_msg_text = "The water is heating, wait for it to reach, the required infustion temp"
-                self.turn_on_heaters(5) # self.recipe['<MASH_STEP>0','<INFUSE_TEMP>']
+                self.toggle = ~self.toggle&1
+
+                if (self.toggle):
+                    self.complete_btn.config(text="Pause")
+                    self.notes_msg_text.set('Heating please wait...')
+                    self.send_data(self.set_temp, self.bzr)
+                    if self.pause_timer > 0:
+                        self.start_timer += (time.time() - self.pause_timer) 
+                        self.pause_timer = 0
+                else:
+                    self.complete_btn.config(text="Play")
+                    self.notes_msg_text.set('Paused')
+                    if self.start_timer > 0:
+                        self.pause_timer = time.time()
+                
+            if self.toggle:
+                self.temp_label_text.set(str(self.temp)+'c')
+                if self.wait_for_temp(self.set_temp):
+                    if (not self.lock):
+                        self.lock = True
+                        self.start_timer = time.time()  
+            else:
+                self.temp_label_text.set(str(self.set_temp)+'c')
+                 
+            if (datetime.timedelta(seconds=self.timer) == datetime.timedelta(seconds=self.set_timer)):
+                if (self.lock):
+                    self.lock = False
+                    self.send_data(1, 0)
+                    self.start_timer = self.timer=0
+                    self.complete_btn.config(text="Play")
+                    self.notes_msg_text.set('Finsihed...')
+                    self.toggle = ~self.toggle&1         
+                
+        # add water and heat
+        elif (self.count == 0):
+            
+            self.notes_label_text.set("Water")
+            self.notes_msg_text.set('Add '+str(self.recipe['<MASH_STEP>0','<INFUSE_AMOUNT>'])+'L of water, once added turn on the elements and press, Step Compelete')     
+            if(self.complete_flag):
+                self.complete_btn.config(state='disabled')
+                self.lock = False
+                self.complete_flag = False
+                self.recipe['<MASH_STEP>0','<INFUSE_TEMP>'] = float(self.recipe['<MASH_STEP>0','<INFUSE_TEMP>'][0].split(' ')[0])
+                self.notes_msg_text.set("The water will begin heating, wait for it to reach, infustion temp - "+str(self.recipe['<MASH_STEP>0','<INFUSE_TEMP>']))
+                self.send_data(temp=round(self.recipe['<MASH_STEP>0','<INFUSE_TEMP>'])) # round(self.recipe['<MASH_STEP>0','<INFUSE_TEMP>'][0]) #self.recipe['<MASH_STEP>0','<INFUSE_TEMP>']
                 self.count = 1
         
         # Wait for water to heat
-        elif(self.count == 1):  
-                if(self.wait_for_temp(5)): # self.recipe['<MASH_STEP>0','<INFUSE_TEMP>']
-                    self.turn_on_heaters(4) # self.recipe['<MASH_STEP>0','<STEP_TEMP>']
-                    self.count = 2 
+        elif(self.count == 1):
+            if(self.wait_for_temp(round(self.recipe['<MASH_STEP>0','<INFUSE_TEMP>']))): # self.recipe['<MASH_STEP>0','<INFUSE_TEMP>']
+                self.send_data(temp=self.recipe['<MASH_STEP>0','<STEP_TEMP>']) # 
+                self.count = 2
+                self.complete_btn.config(state='normal')
+                    
         # add grains
         elif(self.count == 2):
-            self.notes_label_text = "Add Grain"
-            self.notes_msg_text = "Please add the grain, once it's mixed press, Step Complete"
+            self.notes_label_text.set("Add Grain")
+            self.notes_msg_text.set("Please add the grain, once it's mixed press, Step Complete")
             if(self.complete_flag):
+                self.complete_btn.config(state='disabled')
+                self.browse_btn.config(state='disabled')
                 self.complete_flag = False
                 self.start_timer = time.time()
                 self.count = 3
-
+                
         # mash 
         elif(self.count == 3):
-            self.notes_label_text = 'Mash In'
+            self.notes_label_text.set("Mash In")
             try:
-                self.notes_msg_text = 'Mash Finished in '+str(self.recipe['<MASH_STEP>'+str(self.step_count), '<STEP_TIME>'])
-                if( 10 <= self.timer ): # self.recipe['<MASH_STEP>'+str(self.step_count), '<STEP_TIME>']
+                self.notes_msg_text.set('Mash duration is '+str(self.recipe['<MASH_STEP>'+str(self.step_count), '<STEP_TIME>']))
+                if( self.recipe['<MASH_STEP>'+str(self.step_count), '<STEP_TIME>'] <= self.timer ): 
                     self.start_timer = 0
-                    self.turn_on_heaters(3) # self.recipe['<MASH_STEP>'+str(self.step_count), '<STEP_TEMP>']
+                    self.send_data(temp=self.recipe['<MASH_STEP>'+str(self.step_count), '<STEP_TEMP>']) 
                     self.step_count += 1
                     # test the count level
                     self.recipe['<MASH_STEP>'+str(self.step_count),'<STEP_TIME>']
@@ -267,33 +418,34 @@ class Monitor(tk.Frame):
                 self.count = 4
                 self.step_count = 0
                 self.start_timer = 0
+                self.complete_btn.config(state='enabled')
 
         # sparge
         elif(self.count == 4):
-            self.notes_label_text = 'Sparge'
-            self.notes_msg_text = 'Add '+str(self.get_sparge_volume())+'L press, Step Complete when the sparge is finished'
+            self.notes_label_text.set('Sparge')
+            self.notes_msg_text.set('Add '+str(self.get_sparge_volume())+'L press, Step Complete when the sparge is finished')
             if(self.complete_flag):
-                self.notes_msg_text = 'Waiting to boil, make sure you put the lid on, remember to turn off the recir pump before boil'
-                # self.complete_flag = False
+                self.notes_msg_text.set('Waiting to boil, make sure you put the lid on, remember to turn off the recir pump before boil')
+                self.complete_btn.config(state='disabled')
+                self.complete_flag = False
                 self.turn_on_heaters(7)
                 self.count = 5
+                self.lock = True
 
         # boil
         elif (self.count == 5):
-            self.notes_label_text = 'Boil'
+            self.notes_label_text.set('Boil')
             if(self.wait_for_temp(7)):
-                self.notes_msg_text = self.get_boil_additions()
-                if(self.complete_flag):
-                    self.complete_flag = False
+                self.notes_msg_text.set(self.get_boil_additions())
+                if(self.lock):
+                    self.lock = False
                     self.start_timer = time.time()
                
             if(20 <= self.timer):
-                self.notes_label_text = 'Boil Finished'
+                self.notes_label_text.set('Boil Finished')
                 self.start_timer = 0
                 self.count = 6
-            
-        
-        self.update_labels()
+    
         self.after(250, self.state_machine)        
 
     def xml_to_dict(self):
@@ -336,7 +488,6 @@ class Monitor(tk.Frame):
         try:
             # loop over each line
             for line in file.readlines():
-                # print (line)
 
                 # Check for an external match:
                 for ext_name in self.match_external:
@@ -388,14 +539,15 @@ class Monitor(tk.Frame):
                     str2 = ''
 
             self.recipe = recipe
-            for line in recipe:
-                print(line)
+            # for line in recipe:
+            #     print(line)
 
             self.complete_btn.config(state='normal')
             self.state_machine()
 
         except UnboundLocalError:
             pass
+            
         
 
     def clock_tick(self):
@@ -409,5 +561,4 @@ if __name__ == "__main__":
 
     app = BrewZilla()
     app.mainloop()
-
 
