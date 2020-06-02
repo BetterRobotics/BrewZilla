@@ -1,6 +1,6 @@
 BrewZilla 3
 ===========
-The ultimate controller for your BrewZilla 3.0+ it takes a recipe exported from your favorite beer brewing program and automatically sets the steps up with a prompt to guide you along the way. Just export you favorite recipe in XML, run the  program using from the directory with the program, ```python brewzilla.py``` remember to upload and connect the arduino using the udev rule specified below. 
+The ultimate controller for your BrewZilla 3.0+ it takes a recipe exported from your favorite beer brewing program and automatically sets the steps up with a prompt to guide you along the way. Just export you favorite recipe in XML (beersmith 2), run the  program using from the directory with the program, ```python brewzilla.py``` remember to upload and connect the arduino using the udev rule specified below. 
 
 The program's main features
 ----------------------------
@@ -8,6 +8,8 @@ The program's main features
 - Auto mode: reads the XML recipe file and prompts for needed interactions no programming needed
 - Buzzer to aleart the brewer attention is required
 - Auto/Manual functionality to allow you to take control for any reason
+- PID temperature control
+- Communication loss detection
 - Uses all existing hardware that comes with the brewzilla 3
 
 
