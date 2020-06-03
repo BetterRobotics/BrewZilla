@@ -6,7 +6,7 @@ The program's main features
 ----------------------------
 - Manual mode timer: which activates after the set temperature is reached
 - Auto mode: reads the XML recipe file and prompts for needed interactions no programming needed
-- Buzzer to aleart the brewer attention is required
+- Buzzer to alert the brewer attention is required
 - Auto/Manual functionality to allow you to take control for any reason
 - PID temperature control
 - Communication loss detection
