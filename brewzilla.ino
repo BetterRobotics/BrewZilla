@@ -1,13 +1,18 @@
 
 #define RXD_BUFF_SIZE    6
 #define LOCAL_BUFF_SIZE  2
-#define COM_LOST_TIMEOUT 30 // seconds. 
+#define COM_LOST_TIMEOUT 5 // seconds. 
 
-#define brn1_pin 2
-#define brn2_pin 3
-#define bzr_pin  4
-#define pmp_pin  5
+#define brn1_pin 3
+#define brn2_pin 4
+#define bzr_pin  A2
+#define pmp_pin  A6
 #define tmp_pin  A0
+
+#define step 100
+
+#include "chords.h"
+
 
 char input_data[] = {'i','i','i','i'};
 int data_count = 0;
@@ -15,23 +20,21 @@ bool RXD_avali_flag = false, rx_lock = false;
 
 int brn1=0, brn2=0, bzr=0, tmp=0, tmp_set=0, pmp=0;
 
-double pid_timer=0, rx_timer=0, tx_timer=0, diff=0;
-
+double pid_timer=0, rx_timer=0, tx_timer=0, diff=0, bzr_timer=0;
 float integral=0., last_error=0.;
-float kp=3.,ki=5.,kd=0.;
+float kp=12.,ki=6.,kd=4.;
 
 
 int pid(int setp, int input, int kp, int ki, int kd){
     float dt = (millis() - pid_timer)/1000.;
     pid_timer = millis();
     float error = setp - input;
-    Serial.println(dt);
     integral += error;
     if(integral > 255.){integral=255.;}
-    else if(integral < 0.){integral=0.;}
+    else if(integral <=0.){integral=0.;}
     float derivative = error - last_error;
     error = kp*error + (ki*dt)*integral + (kd/dt)*derivative;
-    if(error<0){error=0;}
+    if(error<=0){error=0, integral=0;}
     if(error>255){error=255;}
     return error;
 }
@@ -95,16 +98,10 @@ void decode_data(void){
 }
 
 void set_power(void){
-  float output = 0.;
+  float output = 0;
   if(tmp_set>0){
     output = pid(tmp_set, tmp, kp,ki,kd);
   }
-  Serial.print("PID output: ");
-  Serial.print(output);
-  Serial.print("\ttmp_set: ");
-  Serial.print(tmp_set);
-  Serial.print("\ttmp: ");
-  Serial.println(tmp);
   if(output > 190){
     digitalWrite(brn1_pin, HIGH);
     digitalWrite(brn2_pin, HIGH); 
@@ -118,6 +115,28 @@ void set_power(void){
     digitalWrite(brn1_pin, LOW);
     digitalWrite(brn2_pin, LOW); 
   }
+  /*
+  Serial.print("PID output: ");
+  Serial.print(output);
+  Serial.print("\ttmp_set: ");
+  Serial.print(tmp_set);
+  Serial.print("\ttmp: ");
+  Serial.print(tmp);
+  Serial.print("\traw tmp: ");
+  Serial.println(analogRead(tmp_pin));
+  */
+}
+
+void buzzer(void){
+
+    if(bzr==1){
+        bzr_timer = millis();
+        bzr = 0;
+    }
+    
+    
+    if(millis() < bzr_timer + 1000*180){}
+    else{}
 }
 
 void set_pins(void){
@@ -126,13 +145,118 @@ void set_pins(void){
 }
 
 void get_temp(void){
-  tmp = analogRead(tmp_pin);
+  tmp = map(analogRead(tmp_pin), 353,900, 47, 99);
 }
 
 void send_data(void){
   Serial.print("z,");
   Serial.print(tmp);
   Serial.println(",y");
+}
+
+void play_tune(int index){
+
+    
+    if(index == 1){
+        // iterate over the notes of the melody:
+        for (int thisNote = 0; thisNote < (sizeof(starwars_tempo)/2); thisNote++) {
+
+            // to calculate the note duration, take one second divided by the note type.
+            //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
+            int noteDuration = 1000 / starwars_tempo[thisNote];
+            tone(bzr_pin, starwars[thisNote], noteDuration);
+
+            // to distinguish the notes, set a minimum time between them.
+            // the note's duration + 30% seems to work well:
+            int pauseBetweenNotes = noteDuration * 1.30;
+            delay(pauseBetweenNotes);
+            // stop the tone playing:
+            noTone(bzr_pin);
+        }
+
+    }else if(index == 2){
+    
+        for (int thisNote = 0; thisNote < (sizeof(mario_tempo)/2); thisNote++) {
+
+            // to calculate the note duration, take one second divided by the note type.
+            //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
+            int noteDuration = 1000 / mario_tempo[thisNote];
+            tone(bzr_pin, mario[thisNote], noteDuration);
+
+            // to distinguish the notes, set a minimum time between them.
+            // the note's duration + 30% seems to work well:
+            int pauseBetweenNotes = noteDuration * 1.30;
+            delay(pauseBetweenNotes);
+            // stop the tone playing:
+            noTone(bzr_pin);
+        }
+
+    }else if(index==3){
+    
+        for (int thisNote = 0; thisNote < (sizeof(underworld_tempo)/2); thisNote++) {
+
+            // to calculate the note duration, take one second divided by the note type.
+            //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
+            int noteDuration = 1000 / underworld_tempo[thisNote];
+            tone(bzr_pin, underworld[thisNote], noteDuration);
+
+            // to distinguish the notes, set a minimum time between them.
+            // the note's duration + 30% seems to work well:
+            int pauseBetweenNotes = noteDuration * 1.30;
+            delay(pauseBetweenNotes);
+            // stop the tone playing:
+            noTone(bzr_pin);
+        }
+    }else if(index==4){
+    
+        for (int thisNote = 0; thisNote < (sizeof(alarm_1_tempo)/2); thisNote++) {
+
+            // to calculate the note duration, take one second divided by the note type.
+            //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
+            int noteDuration = 1000 / alarm_1_tempo[thisNote];
+            tone(bzr_pin, alarm_1[thisNote], noteDuration);
+
+            // to distinguish the notes, set a minimum time between them.
+            // the note's duration + 30% seems to work well:
+            int pauseBetweenNotes = noteDuration * 0.40;
+            delay(pauseBetweenNotes);
+            // stop the tone playing:
+            noTone(bzr_pin);
+        }
+    }else if(index==5){
+    
+        for (int thisNote = 0; thisNote < (sizeof(alarm_2_tempo)/2); thisNote++) {
+
+            // to calculate the note duration, take one second divided by the note type.
+            //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
+            int noteDuration = 1000 / alarm_2_tempo[thisNote];
+            tone(bzr_pin, alarm_2[thisNote], noteDuration);
+
+            // to distinguish the notes, set a minimum time between them.
+            // the note's duration + 30% seems to work well:
+            int pauseBetweenNotes = noteDuration * 1.10;
+            delay(pauseBetweenNotes);
+            // stop the tone playing:
+            noTone(bzr_pin);
+        }
+    }else if(index==6){
+    
+        for (int thisNote = 0; thisNote < (sizeof(alarm_3_tempo)/2); thisNote++) {
+
+            // to calculate the note duration, take one second divided by the note type.
+            //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
+            int noteDuration = 1000 / alarm_3_tempo[thisNote];
+            tone(bzr_pin, alarm_3[thisNote], noteDuration);
+
+            // to distinguish the notes, set a minimum time between them.
+            // the note's duration + 30% seems to work well:
+            int pauseBetweenNotes = noteDuration * 1.10;
+            delay(pauseBetweenNotes);
+            // stop the tone playing:
+            noTone(bzr_pin);
+        }
+    }    
+  
 }
 
 void setup(void){
@@ -144,30 +268,43 @@ void setup(void){
   pinMode(bzr_pin, OUTPUT);
   pinMode(pmp_pin, OUTPUT);
   
+  digitalWrite(tmp_pin, LOW);
   digitalWrite(pmp_pin, LOW);
   digitalWrite(brn1_pin, LOW);
   digitalWrite(brn2_pin, LOW);
-  digitalWrite(bzr_pin, HIGH);
-  delay(200);
-  digitalWrite(bzr_pin, LOW);
+  play_tune(1);
   
   
 }
 
 void loop(void){
+
     get_serial();
     decode_data();
-    set_pins();
     get_temp();
+    buzzer();
+    set_pins();
+    set_power();
     
     if (millis()> tx_timer + 200){
         send_data();
-        set_power();
         tx_timer = millis();
     }
     
     delay(20);
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
