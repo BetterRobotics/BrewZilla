@@ -1,5 +1,12 @@
 #!/usr/bin/env python
 
+'''
+    This program is auto run on the pi in the following location:
+
+       "sudo nano /home/pi/.config/lxsession/LXDE-pi/autostart"
+
+'''
+
 
 import datetime, time, ast, sys, os
 import serial, struct
@@ -61,21 +68,12 @@ class Monitor(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.controller = controller
         self.file_address = ''
-        self.count = self.complete_flag = self.set_timer=self.toggle=0
+        self.count = self.complete_flag = self.set_timer=self.btn_press_timer=self.toggle=0
         self.start_timer = self.set_temp = self.pause_timer =self.bzr = self.step_count = 0
         self.recipe = {}
         self.lock = False
         self.auto_flag = 1
-        self.temp = 5
-
-        #for now this is a pretend setup for pi 
-        try:
-            GPIO.setmode(GPIO.BCM)
-            GPIO.setwarnings(False)
-            GPIO.setup(17, GPIO.OUT)
-            GPIO.setup(27, GPIO.OUT)
-        except:
-            pass
+        self.temp = 0
 
         self.notes_label_text = tk.StringVar()
         self.timer_label_text = tk.StringVar()
@@ -136,6 +134,7 @@ class Monitor(tk.Frame):
         # start loops
         self.update_timer()
         self.init_serial()
+        self.read_data()
         
 
     def get_file_address(self):
@@ -177,16 +176,29 @@ class Monitor(tk.Frame):
             self.init_serial()
             
     def read_data(self):
-        self.ser.flushInput()
+        #self.ser.flushInput()
         try:
             
             data = self.ser.readline()
             data = data.split("\r\n")[0].split(",")
             if(data[0] == 'z'):
                 self.temp = int(data[1])
+                
+            if(self.button_active()):
+                self.temp_label_text.set(str(self.set_temp)+'c')
+            else:
+                self.temp_label_text.set(str(self.temp)+'c')
         except:
             print "Error readding coms", sys.exc_info()
-                            
+        
+        self.after(250, self.read_data)
+        
+        
+    def button_active(self):
+        if(time.time() > self.btn_press_timer + 3):
+            return False
+        else:
+            return True
     
     def heartbeat(self):
         try:
@@ -236,17 +248,20 @@ class Monitor(tk.Frame):
         self.after(250, self.update_timer)
 
     def pos_temp(self):
-        self.set_temp+= 1
+        self.set_temp+= 10
+        self.btn_press_timer = time.time()
 
     def neg_temp(self):
-        
-        self.set_temp-= 1
+        self.set_temp-= 10
+        self.btn_press_timer = time.time()
         
     def pos_timer(self):
         self.set_timer+= 1
+        self.btn_press_timer = time.time()
 
     def neg_timer(self):
         self.set_timer-= 1
+        self.btn_press_timer = time.time()
         
     def auto_man(self):
         self.auto_flag = ~self.auto_flag&1
@@ -259,13 +274,12 @@ class Monitor(tk.Frame):
             self.notes_msg_text.set('Set timer and temp, the timer will start once temp is reached')
             self.set_temp = 0
             self.set_timer = 0
-            self.state_machine()
+            self.manual()
         else:
             self.complete_btn.config(text="Step Complete")
             self.auto_man_btn.config(text="Manual")
             self.complete_btn.config(state='disabled')
             self.count=0;
-        print (self.auto_flag)
         
     def wait_for_temp(self, temp=0): 
         if (self.temp == temp):
@@ -327,10 +341,8 @@ class Monitor(tk.Frame):
                 break
                 
         return string
-
-    def state_machine(self):
-        #try:
-        self.read_data()
+        
+    def manual(self):
         # Manual Mode  
         if(not self.auto_flag):
             
@@ -340,37 +352,44 @@ class Monitor(tk.Frame):
 
                 if (self.toggle):
                     self.complete_btn.config(text="Pause")
-                    self.notes_msg_text.set('Heating please wait...')
-                    self.send_data(self.set_temp, self.bzr)
+                    self.notes_msg_text.set('Heating to '+str(self.set_temp)+'c please wait...')
+                    self.send_data(self.set_temp, 6)
                     if self.pause_timer > 0:
                         self.start_timer += (time.time() - self.pause_timer) 
                         self.pause_timer = 0
                 else:
                     self.complete_btn.config(text="Play")
                     self.notes_msg_text.set('Paused')
+                    self.send_data(0, 6)
                     if self.start_timer > 0:
                         self.pause_timer = time.time()
                 
             if self.toggle:
-                self.temp_label_text.set(str(self.temp)+'c')
                 if self.wait_for_temp(self.set_temp):
+                    self.send_data(self.set_temp, 5)
+                    self.notes_msg_text.set('Temp reached timer has started...')
                     if (not self.lock):
                         self.lock = True
                         self.start_timer = time.time()  
-            else:
-                self.temp_label_text.set(str(self.set_temp)+'c')
                  
             if (datetime.timedelta(seconds=self.timer) == datetime.timedelta(seconds=self.set_timer)):
                 if (self.lock):
                     self.lock = False
-                    self.send_data(1, 0)
+                    self.send_data(0, 5)
                     self.start_timer = self.timer=0
                     self.complete_btn.config(text="Play")
                     self.notes_msg_text.set('Finsihed...')
-                    self.toggle = ~self.toggle&1         
-                
+                    self.toggle = ~self.toggle&1
+        else:
+            return
+        
+        self.after(250, self.manual)           
+
+    def state_machine(self):
+        #try:
+              
         # add water and heat
-        elif (self.count == 0):
+        if (self.count == 0):
             
             self.notes_label_text.set("Water")
             self.notes_msg_text.set('Add '+str(self.recipe['<MASH_STEP>0','<INFUSE_AMOUNT>'])+'L of water, once added turn on the elements and press, Step Compelete')     
@@ -380,13 +399,13 @@ class Monitor(tk.Frame):
                 self.complete_flag = False
                 self.recipe['<MASH_STEP>0','<INFUSE_TEMP>'] = float(self.recipe['<MASH_STEP>0','<INFUSE_TEMP>'][0].split(' ')[0])
                 self.notes_msg_text.set("The water will begin heating, wait for it to reach, infustion temp - "+str(self.recipe['<MASH_STEP>0','<INFUSE_TEMP>']))
-                self.send_data(temp=round(self.recipe['<MASH_STEP>0','<INFUSE_TEMP>'])) # round(self.recipe['<MASH_STEP>0','<INFUSE_TEMP>'][0]) #self.recipe['<MASH_STEP>0','<INFUSE_TEMP>']
+                self.send_data(temp=round(self.recipe['<MASH_STEP>0','<INFUSE_TEMP>'])) 
                 self.count = 1
         
         # Wait for water to heat
         elif(self.count == 1):
-            if(self.wait_for_temp(round(self.recipe['<MASH_STEP>0','<INFUSE_TEMP>']))): # self.recipe['<MASH_STEP>0','<INFUSE_TEMP>']
-                self.send_data(temp=self.recipe['<MASH_STEP>0','<STEP_TEMP>']) # 
+            if(self.wait_for_temp(round(self.recipe['<MASH_STEP>0','<INFUSE_TEMP>']))):
+                self.send_data(temp=self.recipe['<MASH_STEP>0','<STEP_TEMP>'])
                 self.count = 2
                 self.complete_btn.config(state='normal')
                     
@@ -538,9 +557,6 @@ class Monitor(tk.Frame):
                     str2 = ''
 
             self.recipe = recipe
-            # for line in recipe:
-            #     print(line)
-
             self.complete_btn.config(state='normal')
             self.state_machine()
 
