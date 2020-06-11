@@ -59,7 +59,7 @@ this will show something like 'lrwxrwxrwx 1 root root 7 Jun  9 18:48 /dev/ARDUIN
 
 If not you will need to check your udev rules at "/etc/udev/rules.d/99-arduino.rules". for more info. 
 
-Next you will need to chekc the upload the .ino script to the arudino nano328, this can be done by typing.
+Next you will need to check the upload of the .ino script to the arudino nano328, this can be done by typing.
 
 ```cd ~/BrewZilla && make clean upload```
 
