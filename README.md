@@ -29,7 +29,7 @@ cd ~/
 ```
 
 ```
-git clone repo
+git clone https://github.com/BetterRobotics/BrewZilla.git
 ```
 
 Go to the BrewZilla directory.
