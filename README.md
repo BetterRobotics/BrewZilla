@@ -36,7 +36,7 @@ Go to the BrewZilla directory.
 ```
 cd BrewZilla
 ```
-Set applicaiton actions
+Set application actions
 ```
 chmod +x install.sh
 ```
@@ -48,5 +48,18 @@ Setup environment
 Auto reboot will kick in and you should have your program running after the loading screen. 
 
 arduino pics for wiring will come shortly. 
+
+
+After installation has finished check you can access the arduino via USB:
+
+```ls -l /dev/ARDUINO```  
+
+this will show something like 'lrwxrwxrwx 1 root root 7 Jun  9 18:48 /dev/ARDUINO -> ttyUSB0' if it was a sucessful install.
+if not you will need to check your udev rules at "/etc/udev/rules.d/99-arduino.rules". for more info. 
+
+Next you will need to upload the .ino script to the arudino nano328, this can be done by typing
+```make clean upload```
+
+once done and wiring is correct you will have automatic Brewzilla. if your a 65L you will need to mode the code to allow one more output from the Arudino to acitve the rl3 on the standard PCB that comes with the BrewZilla
 
 
