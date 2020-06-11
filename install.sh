@@ -23,6 +23,20 @@ echo "
 Setting up devices"
 sudo bash -c 'echo "SUBSYSTEMS=="usb", DRIVERS=="ch341", MODE=="0666", GROUP=="dialout", SYMLINK+="ARDUINO"" > /etc/udev/rules.d/99-arduino.rules'
 
+
+echo  "
+
+
+setting up screen"
+
+sudo rm -rf LCD-show
+git clone https://github.com/goodtft/LCD-show.git
+chmod -R 755 LCD-show
+cd LCD-show/
+sudo ./LCD7B-show 180
+
+
+
 echo "
 
 
