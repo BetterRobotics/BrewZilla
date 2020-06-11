@@ -14,7 +14,7 @@ The program's main features
 
 
 
-<b># NOTE:</b> This code has only been tested in a simulated environment!!! Please only use this if you are experienced in electronics/coding, also this code is only running on python2.7 at this stage.
+<b># NOTE:</b> This code is only running on python2.7 at this stage.
 
 I will be releasing a full version ready to run with all components needed after my testing is completed. 
 
