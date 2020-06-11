@@ -91,17 +91,6 @@ void set_power(void){
     digitalWrite(brn1_pin, LOW);
     digitalWrite(brn2_pin, LOW);
   }
-
-/*
-  Serial.print("PID output: ");
-  Serial.print(output);
-  Serial.print("\ttmp_set: ");
-  Serial.print(tmp_set);
-  Serial.print("\ttmp: ");
-  Serial.print(tmp);
-  Serial.print("\traw tmp: ");
-  Serial.println(analogRead(tmp_pin));
-  */
 }
 
 
@@ -124,101 +113,57 @@ void play_tune(int index){
 
 
     if(index == 1){
-        // iterate over the notes of the melody:
         for (int thisNote = 0; thisNote < (sizeof(starwars_tempo)/2); thisNote++) {
-
-            // to calculate the note duration, take one second divided by the note type.
-            //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
-            int noteDuration = 1000 / starwars_tempo[thisNote];
             tone(bzr_pin, starwars[thisNote], noteDuration);
-
-            // to distinguish the notes, set a minimum time between them.
-            // the note's duration + 30% seems to work well:
             int pauseBetweenNotes = noteDuration * 1.30;
             delay(pauseBetweenNotes);
-            // stop the tone playing:
             noTone(bzr_pin);
         }
 
     }else if(index == 2){
 
         for (int thisNote = 0; thisNote < (sizeof(mario_tempo)/2); thisNote++) {
-
-            // to calculate the note duration, take one second divided by the note type.
-            //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
             int noteDuration = 1000 / mario_tempo[thisNote];
             tone(bzr_pin, mario[thisNote], noteDuration);
-
-            // to distinguish the notes, set a minimum time between them.
-            // the note's duration + 30% seems to work well:
             int pauseBetweenNotes = noteDuration * 1.30;
             delay(pauseBetweenNotes);
-            // stop the tone playing:
             noTone(bzr_pin);
         }
 
     }else if(index==3){
 
         for (int thisNote = 0; thisNote < (sizeof(underworld_tempo)/2); thisNote++) {
-
-            // to calculate the note duration, take one second divided by the note type.
-            //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
             int noteDuration = 1000 / underworld_tempo[thisNote];
             tone(bzr_pin, underworld[thisNote], noteDuration);
-
-            // to distinguish the notes, set a minimum time between them.
-            // the note's duration + 30% seems to work well:
             int pauseBetweenNotes = noteDuration * 1.30;
             delay(pauseBetweenNotes);
-            // stop the tone playing:
             noTone(bzr_pin);
         }
     }else if(index==4){
 
         for (int thisNote = 0; thisNote < (sizeof(alarm_1_tempo)/2); thisNote++) {
-
-            // to calculate the note duration, take one second divided by the note type.
-            //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
             int noteDuration = 1000 / alarm_1_tempo[thisNote];
             tone(bzr_pin, alarm_1[thisNote], noteDuration);
-
-            // to distinguish the notes, set a minimum time between them.
-            // the note's duration + 30% seems to work well:
             int pauseBetweenNotes = noteDuration * 0.40;
             delay(pauseBetweenNotes);
-            // stop the tone playing:
             noTone(bzr_pin);
         }
     }else if(index==5){
 
         for (int thisNote = 0; thisNote < (sizeof(alarm_2_tempo)/2); thisNote++) {
-
-            // to calculate the note duration, take one second divided by the note type.
-            //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
             int noteDuration = 1000 / alarm_2_tempo[thisNote];
             tone(bzr_pin, alarm_2[thisNote], noteDuration);
-
-            // to distinguish the notes, set a minimum time between them.
-            // the note's duration + 30% seems to work well:
             int pauseBetweenNotes = noteDuration * 1.10;
             delay(pauseBetweenNotes);
-            // stop the tone playing:
             noTone(bzr_pin);
         }
     }else if(index==6){
 
         for (int thisNote = 0; thisNote < (sizeof(alarm_3_tempo)/2); thisNote++) {
-
-            // to calculate the note duration, take one second divided by the note type.
-            //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
             int noteDuration = 1000 / alarm_3_tempo[thisNote];
             tone(bzr_pin, alarm_3[thisNote], noteDuration);
-
-            // to distinguish the notes, set a minimum time between them.
-            // the note's duration + 30% seems to work well:
             int pauseBetweenNotes = noteDuration * 1.10;
             delay(pauseBetweenNotes);
-            // stop the tone playing:
             noTone(bzr_pin);
         }
     }
