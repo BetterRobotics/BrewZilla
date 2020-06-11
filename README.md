@@ -18,20 +18,35 @@ The program's main features
 
 I will be releasing a full version ready to run with all components needed after my testing is completed. 
 
-Dependancies are required:
-
-```bash
-sudo apt-get install python-tk
-
-sudo apt-get install python-numpy
+first install git.
 ```
-Also need to write a udev rule to name the Arduino device:
-
-```bash
-sudo nano /etc/udev/rules.d/99-arduino.rules
+sudo apt-get install git -y 
 ```
-Add 
-```bash 
-SUBSYSTEMS=="usb", DRIVERS=="ch341", MODE=="0666", GROUP=="dialout", SYMLINK+="ARDUINO"
+
+Get the Repo
+```
+cd ~/
+```
 
 ```
+git clone repo
+```
+
+Go to the BrewZilla directory.
+```
+cd BrewZilla
+```
+Set applicaiton actions
+```
+chmod +x install.sh
+```
+Setup environment
+```
+./install.sh
+```
+
+Auto reboot will kick in and you should have your program running after the loading screen. 
+
+arduino pics for wiring will come shortly. 
+
+
