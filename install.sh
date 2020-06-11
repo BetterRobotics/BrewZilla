@@ -13,7 +13,7 @@ echo "
 
 
 Installing needed packages"
-sudo apt-get install python-tk python-numpy -y
+sudo apt-get install python-tk python-numpy arduino-core arduino-mk -y
 pip install pyserial
 
 
@@ -33,8 +33,19 @@ echo '@lxpanel --profile LXDE-pi
 
 @python /home/pi/BrewZilla/brewzilla.py' > /home/pi/.config/lxsession/LXDE-pi/autostart
 
+echo "
+
+
+Flashing ARDUINO..."
+cd ~/BrewZilla && make clean upload
 
 echo "
 
 
-Done!. Please reboot now."
+Done!. auto reboot will kick in if not reboot now."
+
+
+sudo reboot
+
+
+
