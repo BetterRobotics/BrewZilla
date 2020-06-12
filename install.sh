@@ -6,7 +6,7 @@ echo "BrewZilla Installing now......"
 echo "
 
 
-UPDATING SYSTEM"
+Updating System"
 sudo apt-get update && sudo apt-get upgrade -y
 
 echo "
@@ -27,7 +27,7 @@ sudo bash -c 'echo "SUBSYSTEMS=="usb", DRIVERS=="ch341", MODE=="0666", GROUP=="d
 echo  "
 
 
-setting up screen"
+Setting up 7" touch screen"
 
 sudo rm -rf LCD-show
 git clone https://github.com/goodtft/LCD-show.git
@@ -50,15 +50,15 @@ echo '@lxpanel --profile LXDE-pi
 echo "
 
 
-Flashing ARDUINO..."
+Flashing Arduino..."
 cd ~/BrewZilla && make clean upload
 
 echo "
 
 
-Done!. auto reboot will kick in if not reboot now."
+Done! Rebooting 5 seconds"
 
-
+sleep 5
 sudo reboot
 
 
