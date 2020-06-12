@@ -1,6 +1,12 @@
 BrewZilla Control 
 ==================
-The ultimate controller for your BrewZilla 3.0; 3.1; 3.1.1; it takes a recipe exported from your favorite beer brewing program and automatically, sets up the steps using a prompt to guide you along the way. Just export you favorite recipe in XML (I use beersmith 2), run the program from the directory, ```python brewzilla.py``` remember to upload and connect the arduino and setup the udev rule specified below. 
+The ultimate controller for your BrewZilla 3.0; 3.1; 3.1.1; 
+
+It takes a recipe exported from your favorite beer brewing program and automatically, sets up the steps using a prompt to guide you along the way. Just export you favorite recipe in XML to a USB plug it into the device and hit "Load Recipe" and open the xml file. You can remove the USB or leave it once this is done. 
+
+If you want to send the recipe wirelessly I suggest placingit in ~/BrewZilla/Recipe to as this is the defaut browse location. The wireless option is 
+
+```scp 'file location' pi@"ip address":~/BrewZilla/```
 
 The program's main features
 ----------------------------
