@@ -1,6 +1,10 @@
 #!/bin/bash
 
-echo "BrewZilla Installing now......"
+clear
+
+echo "
+
+BrewZilla Installing......"
 
 
 echo "
