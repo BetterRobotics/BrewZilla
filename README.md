@@ -50,7 +50,10 @@ Auto reboot will kick in and you should have your program running after the load
 arduino pics for wiring will come shortly or check the brewzilla.ino file for info input / output pins.
 
 
-<b>Trouble shooting</b>
+
+
+
+<b>** Trouble shooting</b>
 
 After installation has finished check you can access the arduino via USB:
 
@@ -64,7 +67,10 @@ Next you will need to check the upload of the .ino script to the arudino nano328
 
 Once done and wiring is correct you will have automatic an Brewzilla. 
 
-<b>65L Setup</b>
+
+
+
+<b>** 65L Setup</b>
 If your a 65L you will need to mode the code to allow one more output from the Arudino to acitve the "RL3" input on the standard PCB that comes with the BrewZilla I will do this for later relases.  
 
 
