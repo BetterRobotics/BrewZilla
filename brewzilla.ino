@@ -114,6 +114,7 @@ void play_tune(int index){
 
     if(index == 1){
         for (int thisNote = 0; thisNote < (sizeof(starwars_tempo)/2); thisNote++) {
+            int noteDuration = 1000 / starwars_tempo[thisNote];
             tone(bzr_pin, starwars[thisNote], noteDuration);
             int pauseBetweenNotes = noteDuration * 1.30;
             delay(pauseBetweenNotes);
