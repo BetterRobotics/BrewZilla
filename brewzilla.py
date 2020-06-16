@@ -177,9 +177,9 @@ class Monitor(tk.Frame):
             self.init_serial()
 
     def read_data(self):
-        self.ser.flushInput()
+        
         try:
-
+	    self.ser.flushInput()
             data = self.ser.readline()
             data = data.split("\r\n")[0].split(",")
             if(data[0] == 'z'):
