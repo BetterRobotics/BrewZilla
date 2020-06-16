@@ -373,7 +373,7 @@ class Monitor(tk.Frame):
                         self.lock = True
                         self.start_timer = time.time()
 
-            if (datetime.timedelta(seconds=self.timer) == datetime.timedelta(seconds=self.set_timer)):
+            if (self.timer == self.set_timer*60):
                 if (self.lock):
                     self.lock = False
                     self.send_data(0, 5)
@@ -427,7 +427,7 @@ class Monitor(tk.Frame):
             self.notes_label_text.set("Mash In")
             try:
                 self.notes_msg_text.set('Mash duration is '+str(self.recipe['<MASH_STEP>'+str(self.step_count), '<STEP_TIME>']))
-                if( self.recipe['<MASH_STEP>'+str(self.step_count), '<STEP_TIME>'] <= self.timer ):
+                if( self.recipe['<MASH_STEP>'+str(self.step_count), '<STEP_TIME>'] * 60 <= self.timer):
                     self.start_timer = 0
                     self.send_data(self.recipe['<MASH_STEP>'+str(self.step_count), '<STEP_TEMP>'],4)
                     self.step_count += 1
@@ -461,7 +461,7 @@ class Monitor(tk.Frame):
                     self.lock = False
                     self.start_timer = time.time()
 
-            if(self.recipe['<RECIPE>0', '<BOIL_TIME>'] <= self.timer):
+            if(self.recipe['<RECIPE>0', '<BOIL_TIME>'] * 60 <= self.timer):
                 self.notes_label_text.set('Boil Finished')
                 self.start_timer = 0
                 self.count = 6
