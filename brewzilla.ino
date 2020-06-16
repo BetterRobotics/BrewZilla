@@ -17,7 +17,7 @@ char input_data[] = {'i','i','i','i'};
 int data_count = 0;
 bool RXD_avali_flag = false, rx_lock = false, chord_flag=false;
 
-int brn1=0, brn2=0, bzr=0, tmp=0, tmp_set=0, pmp=0;
+int brn1=0, brn2=0, bzr=0, a_tmp=0, tmp=0, tmp_set=0, pmp=0;
 
 double pid_timer=0, rx_timer=0, tx_timer=0, diff=0, bzr_timer=0;
 float integral=0., last_error=0.;
@@ -100,12 +100,20 @@ void set_pins(void){
 }
 
 void get_temp(void){
-  tmp = map(analogRead(tmp_pin), 353,900, 47, 99);
+  
+  int count = 1;
+  while(count < 10){
+     a_tmp += analogRead(tmp_pin);
+     delay(5);
+     count++;
+  }
+  tmp = map(a_tmp/count, 353,900, 47, 99);
 }
 
 void send_data(void){
   Serial.print("z,");
   Serial.print(tmp);
+  Serial.print(a_tmp);
   Serial.println(",y");
 }
 
@@ -232,8 +240,9 @@ void loop(void){
 
     if (millis()> tx_timer + 200){
         send_data();
+        
         tx_timer = millis();
     }
 
-    delay(20);
+    //delay(20);
 }
