@@ -101,15 +101,16 @@ void set_pins(void){
 
 void get_temp(void){
   
-  //int count = 1;
-  /*
-  while(count < 10){
-     a_tmp += analogRead(tmp_pin);
+  int count=1;
+  float idx=0.0;
+  while(1){
+     idx += analogRead(tmp_pin);
      delay(5);
      count++;
+     if(count>=10){break;}
   }
-  */
-  a_tmp = analogRead(tmp_pin);
+  a_tmp = int(idx/count); 
+  //a_tmp = analogRead(tmp_pin);
   tmp = map(a_tmp, 353,900, 47, 99);
 }
 
