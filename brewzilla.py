@@ -79,7 +79,7 @@ class Monitor(tk.Frame):
         self.temp_label_text = tk.StringVar()
         self.notes_msg_text = tk.StringVar()
 	self.a_temp_label_text = tk.StringVar()
-	self.a_temp_label_text.set("0c")
+	self.a_temp_label_text.set("0")
         self.notes_label_text.set("Welcome")
         self.timer_label_text.set("0:00:00")
         self.temp_label_text.set("0c")
@@ -194,7 +194,7 @@ class Monitor(tk.Frame):
             else:
                 self.temp_label_text.set(str(self.temp)+'c')
 	    
-	    self.a_temp_label_text.set(str(a_temp)+'c')
+	    self.a_temp_label_text.set(str(a_temp))
 		
             
         except:
