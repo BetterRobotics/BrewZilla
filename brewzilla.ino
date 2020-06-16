@@ -109,7 +109,7 @@ void get_temp(void){
      count++;
      if(count>=10){break;}
   }
-  a_tmp = int(idx/count); 
+  a_tmp = int(idx/(count-1)); 
   //a_tmp = analogRead(tmp_pin);
   tmp = map(a_tmp, 353,900, 47, 99);
 }
