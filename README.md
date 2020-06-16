@@ -1,4 +1,4 @@
-BrewZilla Control 
+BrewZilla Control - Developmental Stage - Status working
 ==================
 The ultimate controller for your BrewZilla 3.0; 3.1; 3.1.1; 
 
