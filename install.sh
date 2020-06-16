@@ -21,13 +21,6 @@ sudo apt-get install python-tk python-numpy arduino-core arduino-mk -y
 pip install pyserial
 
 
-echo "
-
-
-Setting up devices"
-sudo bash -c 'echo "SUBSYSTEMS=="usb", DRIVERS=="ch341", MODE=="0666", GROUP=="dialout", SYMLINK+="ARDUINO"" > /etc/udev/rules.d/99-arduino.rules'
-
-
 echo  "
 
 
