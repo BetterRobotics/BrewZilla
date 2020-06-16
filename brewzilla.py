@@ -139,7 +139,7 @@ class Monitor(tk.Frame):
 
     def get_file_address(self):
         rep = filedialog.askopenfilenames(parent=self.controller,
-            initialdir='/Users/thebunker/Desktop',
+            initialdir='/home/pi/BrewZilla/Recipes',
             filetypes=[("XML", "*.xml")])
         self.file_address = rep
         time.sleep(0.1)
@@ -177,7 +177,7 @@ class Monitor(tk.Frame):
             self.init_serial()
 
     def read_data(self):
-        #self.ser.flushInput()
+        self.ser.flushInput()
         try:
 
             data = self.ser.readline()
