@@ -111,7 +111,7 @@ void get_temp(void){
   }
   a_tmp = int(idx/(count-1)); 
   //a_tmp = analogRead(tmp_pin);
-  tmp = map(a_tmp, 353,900, 47, 99);
+  tmp = map(a_tmp, 208,952, 20, 100);
 }
 
 void send_data(void){
