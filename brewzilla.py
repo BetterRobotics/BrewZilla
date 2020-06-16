@@ -79,6 +79,7 @@ class Monitor(tk.Frame):
         self.temp_label_text = tk.StringVar()
         self.notes_msg_text = tk.StringVar()
 	self.a_temp_label_text = tk.StringVar()
+	self.a_temp_label_text.set("0c")
         self.notes_label_text.set("Welcome")
         self.timer_label_text.set("0:00:00")
         self.temp_label_text.set("0c")
@@ -186,14 +187,16 @@ class Monitor(tk.Frame):
             data = data.split("\r\n")[0].split(",")
             if(data[0] == 'z'):
                 self.temp = int(data[1])
-		a_tmp = int(data[2])
+		a_temp = int(data[2])
 
             if(self.button_active()):
                 self.temp_label_text.set(str(self.set_temp)+'c')
             else:
                 self.temp_label_text.set(str(self.temp)+'c')
+	    
+	    self.a_temp_label_text.set(str(a_temp)+'c')
 		
-            self.a_temp_label_text.set(str(self.a_temp)+'c')
+            
         except:
             print "Error readding coms", sys.exc_info()
 
