@@ -4,7 +4,6 @@
     This program is auto run on the pi in the following location:
 
        "sudo nano /home/pi/.config/lxsession/LXDE-pi/autostart"
-
 '''
 
 
@@ -79,6 +78,7 @@ class Monitor(tk.Frame):
         self.timer_label_text = tk.StringVar()
         self.temp_label_text = tk.StringVar()
         self.notes_msg_text = tk.StringVar()
+	self.a_temp_label_text = tk.StringVar()
         self.notes_label_text.set("Welcome")
         self.timer_label_text.set("0:00:00")
         self.temp_label_text.set("0c")
@@ -100,6 +100,8 @@ class Monitor(tk.Frame):
         self.timer_label.place(x=60,y=80)
         self.temp_label = tk.Label(self, textvariable=self.temp_label_text, font=controller.title_font)
         self.temp_label.place(x=100,y=150)
+	self.atemp_label = tk.Label(self, textvariable=self.a_temp_label_text, font=controller.title_font)
+        self.atemp_label.place(x=100,y=190)
         self.notes_label = tk.Label(self, textvariable=self.notes_label_text, font=controller.large_font)
         self.notes_label.place(x=400, y=50, width=800, height=50, anchor='center')
         self.notes_msg = tk.Label(self, textvariable=self.notes_msg_text, font=controller.msg_font, wrap=370, anchor='e', justify='left')
@@ -128,7 +130,7 @@ class Monitor(tk.Frame):
         time_p_btn.place(x=30, y=350)
         time_n_btn = ttk.Button(self, text="    -    " ,command=lambda: self.neg_timer())
         time_n_btn.place(x=130, y=350)
-        self.auto_man_btn = ttk.Button(self, text="Manuel" ,width=8,command=lambda: self.auto_man())
+        self.auto_man_btn = ttk.Button(self, text="Manuel", width=8, command=lambda: self.auto_man())
         self.auto_man_btn.place(x=80, y=400)
 
         # start loops
@@ -184,11 +186,14 @@ class Monitor(tk.Frame):
             data = data.split("\r\n")[0].split(",")
             if(data[0] == 'z'):
                 self.temp = int(data[1])
+		a_tmp = int(data[2])
 
             if(self.button_active()):
                 self.temp_label_text.set(str(self.set_temp)+'c')
             else:
                 self.temp_label_text.set(str(self.temp)+'c')
+		
+            self.a_temp_label_text.set(str(self.a_temp)+'c')
         except:
             print "Error readding coms", sys.exc_info()
 
