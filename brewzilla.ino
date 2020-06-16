@@ -109,7 +109,8 @@ void get_temp(void){
      count++;
   }
   */
-  tmp = map(analogRead(tmp_pin), 353,900, 47, 99);
+  a_tmp = analogRead(tmp_pin);
+  tmp = map(a_tmp, 353,900, 47, 99);
 }
 
 void send_data(void){
