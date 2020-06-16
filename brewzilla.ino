@@ -113,6 +113,7 @@ void get_temp(void){
 void send_data(void){
   Serial.print("z,");
   Serial.print(tmp);
+  Serial.print(",");
   Serial.print(a_tmp);
   Serial.println(",y");
 }
