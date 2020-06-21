@@ -111,7 +111,8 @@ void get_temp(void){
   }
   a_tmp = int(idx/(count-1)); 
   //a_tmp = analogRead(tmp_pin);
-  tmp = map(a_tmp, 208,952, 20, 100);
+  tmp = map(a_tmp, 208,952, 20, 100); // mapped values to match tmp prob
+  if(a_tmp > 925  && tmp < 100){tmp = 100;}
 }
 
 void send_data(void){
