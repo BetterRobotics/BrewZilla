@@ -257,19 +257,19 @@ class Monitor(tk.Frame):
         self.after(250, self.update_timer)
 
     def pos_temp(self):
-        self.set_temp+= 10
+        self.set_temp+= 1
         self.btn_press_timer = time.time()
 
     def neg_temp(self):
-        self.set_temp-= 10
+        self.set_temp-= 1
         self.btn_press_timer = time.time()
 
     def pos_timer(self):
-        self.set_timer+= 1
+        self.set_timer+= 10
         self.btn_press_timer = time.time()
 
     def neg_timer(self):
-        self.set_timer-= 1
+        self.set_timer-= 10
         self.btn_press_timer = time.time()
 
     def auto_man(self):
@@ -375,13 +375,13 @@ class Monitor(tk.Frame):
 
             if self.toggle:
                 if self.wait_for_temp(self.set_temp):
-                    self.send_data(self.set_temp, 5)
-                    self.notes_msg_text.set('Temp reached timer has started...')
                     if (not self.lock):
+			self.notes_msg_text.set('Temp reached timer has started...')
+			self.send_data(self.set_temp, 5)
                         self.lock = True
                         self.start_timer = time.time()
 
-            if (self.timer == self.set_timer*60):
+            if (self.timer == self.set_timer * 60):
                 if (self.lock):
                     self.lock = False
                     self.send_data(0, 5)
@@ -459,6 +459,7 @@ class Monitor(tk.Frame):
                 self.send_data(temp=110, bzr=5)
                 self.count = 5
                 self.lock = True
+		self.timer = 0
 
         # boil
         elif (self.count == 5):
