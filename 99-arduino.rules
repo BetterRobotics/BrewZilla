@@ -1,0 +1,1 @@
+SUBSYSTEMS=="usb", DRIVERS=="ch341", MODE="0666", GROUP="dialout", SYMLINK+="ARDUINO"
