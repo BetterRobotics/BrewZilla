@@ -44,6 +44,14 @@ echo '@lxpanel --profile LXDE-pi
 
 @python /home/pi/BrewZilla/brewzilla.py' > /home/pi/.config/lxsession/LXDE-pi/autostart
 
+
+echo "
+
+
+Setting up arduino..."
+sudo cp 99-arduino.rules /etc/udev/rules.d/
+
+
 echo "
 
 
