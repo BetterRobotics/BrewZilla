@@ -77,6 +77,6 @@ Once done and wiring is correct you will have automatic an Brewzilla.
 
 
 <b>** 65L Setup</b>
-If your a 65L you will need to mode the code to allow one more output from the Arudino to acitve the "RL3" input on the standard PCB that comes with the BrewZilla I will do this for later relases.  
+If your a 65L you will need to mode the code to allow one more output from the Arudino to acitve the "RL3" input on the standard PCB that comes with the BrewZilla I will do this for later relases. 
 
 

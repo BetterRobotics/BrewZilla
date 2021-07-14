@@ -19,23 +19,23 @@ bool RXD_avali_flag = false, rx_lock = false, chord_flag=false;
 
 int brn1=0, brn2=0, bzr=0, a_tmp=0, tmp=0, tmp_set=0, pmp=0;
 
-double pid_timer=0, rx_timer=0, tx_timer=0, diff=0, bzr_timer=0;
+double pid_timer=0, rx_timer=0, tx_timer=0, diff=0, bzr_timer=0, brn_timer=0;
 float integral=0., last_error=0.;
 float kp=12.,ki=6.,kd=4.;
 
 
 int pid(int setp, int input, int kp, int ki, int kd){
-    float dt = (millis() - pid_timer)/1000.;
-    pid_timer = millis();
-    float error = setp - input;
-    integral += error;
-    if(integral > 255.){integral=255.;}
-    else if(integral <=0.){integral=0.;}
-    float derivative = error - last_error;
-    error = kp*error + (ki*dt)*integral + (kd/dt)*derivative;
-    if(error<=0){error=0, integral=0;}
-    if(error>255){error=255;}
-    return error;
+	float dt = (millis() - pid_timer)/1000.;
+	pid_timer = millis();
+	float error = setp - input;
+	integral += error;
+	if(integral > 255.){integral=255.;}
+	else if(integral <=0.){integral=0.;}
+	float derivative = error - last_error;
+	error = kp*error + (ki*dt)*integral + (kd/dt)*derivative;
+	if(error<=0){error=0, integral=0;}
+	if(error>255){error=255;}
+	return error;
 }
 
 bool hbt_ok(void){
@@ -78,18 +78,24 @@ void set_power(void){
   if(tmp_set>0){
     output = pid(tmp_set, tmp, kp,ki,kd);
   }
-  if(output > 190){
-    digitalWrite(brn1_pin, HIGH);
-    digitalWrite(brn2_pin, HIGH);
-  }else if(output > 50){
-    digitalWrite(brn1_pin, HIGH);
-    digitalWrite(brn2_pin, LOW);
-  }else if(output > 0){
-    digitalWrite(brn1_pin, LOW);
-    digitalWrite(brn2_pin, HIGH);
-  }else{
-    digitalWrite(brn1_pin, LOW);
-    digitalWrite(brn2_pin, LOW);
+  if(millis() > brn_timer + 3000){
+    if(output > 190){
+      digitalWrite(brn1_pin, HIGH);
+      digitalWrite(brn2_pin, HIGH);
+      brn_timer = millis();
+    }else if(output > 50){
+      digitalWrite(brn1_pin, HIGH);
+      digitalWrite(brn2_pin, LOW);
+      brn_timer = millis();
+    }else if(output > 0){
+      digitalWrite(brn1_pin, LOW);
+      digitalWrite(brn2_pin, HIGH);
+      brn_timer = millis();
+    }else{
+      digitalWrite(brn1_pin, LOW);
+      digitalWrite(brn2_pin, LOW);
+      brn_timer = millis();
+    }
   }
 }
 
@@ -104,93 +110,86 @@ void get_temp(void){
   int count=1;
   float idx=0.0;
   while(1){
-     idx += analogRead(tmp_pin);
-     delay(5);
-     count++;
-     if(count>=10){break;}
+		idx += analogRead(tmp_pin);
+		delay(5);
+		count++;
+		if(count>=10){break;}
   }
   a_tmp = int(idx/(count-1)); 
-  //a_tmp = analogRead(tmp_pin);
-  tmp = map(a_tmp, 208,952, 20, 100); // mapped values to match tmp prob
-  if(a_tmp > 925  && tmp < 100){tmp = 100;}
+  
+
+
+  //------------------- Calibration -------------------//
+  // monitor analog data values to match tmp prob readings
+  // tmp = map(a_tmp, Analog Temp A, Analog Temp B, Actual Temp A, Actual Temp B)
+  tmp = map(a_tmp,         200,           900,           20,            100     );   
 }
 
 void send_data(void){
   Serial.print("z,");
-  Serial.print(tmp);
+  Serial.print(tmp); 
   Serial.print(",");
   Serial.print(a_tmp);
   Serial.println(",y");
 }
 
 void play_tune(int index){
-
-
-    if(index == 1){
-        for (int thisNote = 0; thisNote < (sizeof(starwars_tempo)/2); thisNote++) {
-            int noteDuration = 1000 / starwars_tempo[thisNote];
-            tone(bzr_pin, starwars[thisNote], noteDuration);
-            int pauseBetweenNotes = noteDuration * 1.30;
-            delay(pauseBetweenNotes);
-            noTone(bzr_pin);
-        }
-
-    }else if(index == 2){
-
-        for (int thisNote = 0; thisNote < (sizeof(mario_tempo)/2); thisNote++) {
-            int noteDuration = 1000 / mario_tempo[thisNote];
-            tone(bzr_pin, mario[thisNote], noteDuration);
-            int pauseBetweenNotes = noteDuration * 1.30;
-            delay(pauseBetweenNotes);
-            noTone(bzr_pin);
-        }
-
-    }else if(index==3){
-
-        for (int thisNote = 0; thisNote < (sizeof(underworld_tempo)/2); thisNote++) {
-            int noteDuration = 1000 / underworld_tempo[thisNote];
-            tone(bzr_pin, underworld[thisNote], noteDuration);
-            int pauseBetweenNotes = noteDuration * 1.30;
-            delay(pauseBetweenNotes);
-            noTone(bzr_pin);
-        }
-    }else if(index==4){
-
-        for (int thisNote = 0; thisNote < (sizeof(alarm_1_tempo)/2); thisNote++) {
-            int noteDuration = 1000 / alarm_1_tempo[thisNote];
-            tone(bzr_pin, alarm_1[thisNote], noteDuration);
-            int pauseBetweenNotes = noteDuration * 0.40;
-            delay(pauseBetweenNotes);
-            noTone(bzr_pin);
-        }
-    }else if(index==5){
-
-        for (int thisNote = 0; thisNote < (sizeof(alarm_2_tempo)/2); thisNote++) {
-            int noteDuration = 1000 / alarm_2_tempo[thisNote];
-            tone(bzr_pin, alarm_2[thisNote], noteDuration);
-            int pauseBetweenNotes = noteDuration * 1.10;
-            delay(pauseBetweenNotes);
-            noTone(bzr_pin);
-        }
-    }else if(index==6){
-
-        for (int thisNote = 0; thisNote < (sizeof(alarm_3_tempo)/2); thisNote++) {
-            int noteDuration = 1000 / alarm_3_tempo[thisNote];
-            tone(bzr_pin, alarm_3[thisNote], noteDuration);
-            int pauseBetweenNotes = noteDuration * 1.10;
-            delay(pauseBetweenNotes);
-            noTone(bzr_pin);
-        }
+  if(index == 1){
+    for (int thisNote = 0; thisNote < (sizeof(starwars_tempo)/2); thisNote++) {
+      int noteDuration = 1000 / starwars_tempo[thisNote];
+      tone(bzr_pin, starwars[thisNote], noteDuration);
+      int pauseBetweenNotes = noteDuration * 1.30;
+      delay(pauseBetweenNotes);
+      noTone(bzr_pin);
     }
-
+  }else if(index == 2){
+    for (int thisNote = 0; thisNote < (sizeof(mario_tempo)/2); thisNote++) {
+      int noteDuration = 1000 / mario_tempo[thisNote];
+      tone(bzr_pin, mario[thisNote], noteDuration);
+      int pauseBetweenNotes = noteDuration * 1.30;
+      delay(pauseBetweenNotes);
+      noTone(bzr_pin);
+    }
+  }else if(index==3){
+    for (int thisNote = 0; thisNote < (sizeof(underworld_tempo)/2); thisNote++) {
+      int noteDuration = 1000 / underworld_tempo[thisNote];
+      tone(bzr_pin, underworld[thisNote], noteDuration);
+      int pauseBetweenNotes = noteDuration * 1.30;
+      delay(pauseBetweenNotes);
+      noTone(bzr_pin);
+    }
+  }else if(index==4){
+      for (int thisNote = 0; thisNote < (sizeof(alarm_1_tempo)/2); thisNote++) {
+      int noteDuration = 1000 / alarm_1_tempo[thisNote];
+      tone(bzr_pin, alarm_1[thisNote], noteDuration);
+      int pauseBetweenNotes = noteDuration * 0.40;
+      delay(pauseBetweenNotes);
+      noTone(bzr_pin);
+    }
+  }else if(index==5){
+    for (int thisNote = 0; thisNote < (sizeof(alarm_2_tempo)/2); thisNote++) {
+      int noteDuration = 1000 / alarm_2_tempo[thisNote];
+      tone(bzr_pin, alarm_2[thisNote], noteDuration);
+      int pauseBetweenNotes = noteDuration * 1.10;
+      delay(pauseBetweenNotes);
+      noTone(bzr_pin);
+    }
+  }else if(index==6){
+    for (int thisNote = 0; thisNote < (sizeof(alarm_3_tempo)/2); thisNote++) {
+      int noteDuration = 1000 / alarm_3_tempo[thisNote];
+      tone(bzr_pin, alarm_3[thisNote], noteDuration);
+      int pauseBetweenNotes = noteDuration * 1.10;
+      delay(pauseBetweenNotes);
+      noTone(bzr_pin);
+    }
+  }
 }
 
 void buzzer(void){
-
-    if(bzr > 0){
-      play_tune(bzr);
-      bzr = 0;
-    }
+  if(bzr > 0){
+    play_tune(bzr);
+    bzr = 0;
+  }
 }
 
 void decode_data(void){
@@ -210,11 +209,11 @@ void decode_data(void){
       tmp_set=0;
     }
   }else if (!hbt_ok()){
-     brn1 = 0;
-     brn2 = 0;
-     bzr =  0;
-     pmp =  0;
-     tmp_set=0;
+		brn1 = 0;
+		brn2 = 0;
+		bzr =  0;
+		pmp =  0;
+		tmp_set=0;
   }
 }
 
@@ -231,24 +230,20 @@ void setup(void){
   digitalWrite(pmp_pin, LOW);
   digitalWrite(brn1_pin, LOW);
   digitalWrite(brn2_pin, LOW);
-
-
 }
 
 void loop(void){
 
-    get_serial();
-    decode_data();
-    get_temp();
-    buzzer();
-    set_pins();
-    set_power();
+  get_serial();
+  decode_data();
+  get_temp();
+  buzzer();
+  set_pins();
+  set_power();
 
-    if (millis()> tx_timer + 200){
-        send_data();
-        
-        tx_timer = millis();
-    }
-
-    //delay(20);
+  if (millis()> tx_timer + 200){
+    send_data();
+    tx_timer = millis();
+  }
+  //delay(20);
 }
