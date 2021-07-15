@@ -72,6 +72,6 @@ Next you will need to check the upload of the .ino script to the arudino nano328
 
 ```cd ~/BrewZilla && make clean upload```
 
-Once done and wiring is correct you will have automatic an Brewzilla.
+Once done and wiring is correct you will have an automatic Brewzilla with wireless connectivity.
 
 
