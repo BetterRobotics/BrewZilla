@@ -41,7 +41,7 @@ class BrewZilla(tk.Tk):
 
 		tk.Tk.__init__(self, *args, **kwargs)
 		self.title("BrewZilla v1.0")
-		#self.attributes('-fullscreen', True)
+		self.attributes('-fullscreen', True)
 		self.geometry("800x480")
 		self.resizable(width=False, height=False)
 		self.config(bg="white")
