@@ -1,4 +1,4 @@
-BrewZilla Control - Developmental Stage - Status working
+BrewZilla Control
 ==================
 The ultimate controller for your BrewZilla 3.0; 3.1; 3.1.1; 
 
@@ -77,6 +77,6 @@ Once done and wiring is correct you will have automatic an Brewzilla.
 
 
 <b>** 65L Setup</b>
-If your a 65L you will need to mode the code to allow one more output from the Arudino to acitve the "RL3" input on the standard PCB that comes with the BrewZilla I will do this for later relases. 
+If your using a 65L model you will need to chnage the type setting in .ino file to "#define MODEL 0" then run `cd ~/BrewZilla && make clean upload`
 
 
