@@ -2,11 +2,20 @@
 #define LOCAL_BUFF_SIZE  2
 #define COM_LOST_TIMEOUT 5 // seconds.
 
-#define brn1_pin 4
-#define brn2_pin 3
+#define brn1_pin 3
+#define brn2_pin 4
+#define brn3_pin 5
+
 #define bzr_pin  A2
 #define pmp_pin  A6
 #define tmp_pin  A0
+
+//   Brewzilla Model type:
+//   --------------------- 
+//        65L --> MODEL 0   
+//        35L --> MODEL 1 
+
+#define MODEL 1
 
 #define step 100
 
@@ -17,7 +26,7 @@ char input_data[] = {'i','i','i','i'};
 int data_count = 0;
 bool RXD_avali_flag = false, rx_lock = false, chord_flag=false;
 
-int brn1=0, brn2=0, bzr=0, a_tmp=0, tmp=0, tmp_set=0, pmp=0;
+int brn1=0, brn2=0, brn3_pin=0, bzr=0, a_tmp=0, tmp=0, tmp_set=0, pmp=0;
 
 double pid_timer=0, rx_timer=0, tx_timer=0, diff=0, bzr_timer=0, brn_timer=0;
 float integral=0., last_error=0.;
@@ -34,7 +43,7 @@ int pid(int setp, int input, int kp, int ki, int kd){
 	float derivative = error - last_error;
 	error = kp*error + (ki*dt)*integral + (kd/dt)*derivative;
 	if(error<=0){error=0, integral=0;}
-	if(error>255){error=255;}
+	if(error>350){error=350;}
 	return error;
 }
 
@@ -78,23 +87,70 @@ void set_power(void){
   if(tmp_set>0){
     output = pid(tmp_set, tmp, kp,ki,kd);
   }
-  if(millis() > brn_timer + 3000){
-    if(output > 190){
-      digitalWrite(brn1_pin, HIGH);
-      digitalWrite(brn2_pin, HIGH);
-      brn_timer = millis();
-    }else if(output > 50){
-      digitalWrite(brn1_pin, HIGH);
-      digitalWrite(brn2_pin, LOW);
-      brn_timer = millis();
-    }else if(output > 0){
-      digitalWrite(brn1_pin, LOW);
-      digitalWrite(brn2_pin, HIGH);
-      brn_timer = millis();
-    }else{
-      digitalWrite(brn1_pin, LOW);
-      digitalWrite(brn2_pin, LOW);
-      brn_timer = millis();
+  if(MODEL){
+    if(millis() > brn_timer + 3000){
+      if(output > 190){
+        digitalWrite(brn1_pin, HIGH);
+        digitalWrite(brn2_pin, HIGH);
+        brn_timer = millis();
+      }else if(output > 50){
+        digitalWrite(brn1_pin, LOW);
+        digitalWrite(brn2_pin, HIGH);
+        brn_timer = millis();
+      }else if(output > 0){
+        digitalWrite(brn1_pin, HIGH);
+        digitalWrite(brn2_pin, LOW);
+        brn_timer = millis();
+      }else{
+        digitalWrite(brn1_pin, LOW);
+        digitalWrite(brn2_pin, LOW);
+        brn_timer = millis();
+      }
+    }
+  }else{
+    if(millis() > brn_timer + 3000){
+      
+      if(output > 300){
+        digitalWrite(brn1_pin, LOW);
+        digitalWrite(brn2_pin, HIGH);  //3500
+        igitalWrite(brn3_pin, LOW);
+        brn_timer = millis();
+      }else if(output > 250){
+        digitalWrite(brn1_pin, LOW);
+        digitalWrite(brn2_pin, HIGH);  //3000
+        igitalWrite(brn3_pin, LOW);
+        brn_timer = millis();
+      }else if(output > 200){
+        ddigitalWrite(brn1_pin, LOW);
+        digitalWrite(brn2_pin, HIGH);  //2500
+        digitalWrite(brn3_pin, LOW);
+        brn_timer = millis();
+      }else if(output > 150){
+        digitalWrite(brn1_pin, LOW);
+        digitalWrite(brn2_pin, LOW);   //2000
+        digitalWrite(brn3_pin, HIGH);
+        brn_timer = millis();
+      }else if(output > 100){
+        digitalWrite(brn1_pin, HIGH);
+        digitalWrite(brn2_pin, HIGH);  //1500
+        digitalWrite(brn3_pin, LOW);
+        brn_timer = millis();
+      }else if(output > 50){
+        digitalWrite(brn1_pin, LOW);
+        digitalWrite(brn2_pin, HIGH);  //1000
+        digitalWrite(brn3_pin, LOW);
+        brn_timer = millis();
+      }else if(output > 0){
+        digitalWrite(brn1_pin, HIGH);
+        digitalWrite(brn2_pin, LOW);  // 500
+        digitalWrite(brn3_pin, LOW);
+
+        brn_timer = millis();
+      }else{
+        digitalWrite(brn1_pin, LOW);
+        digitalWrite(brn2_pin, LOW);
+        brn_timer = millis();
+      }
     }
   }
 }
@@ -223,6 +279,7 @@ void setup(void){
   pinMode(tmp_pin, INPUT_PULLUP);
   pinMode(brn1_pin, OUTPUT);
   pinMode(brn2_pin, OUTPUT);
+  pinMode(brn3_pin, OUTPUT);
   pinMode(bzr_pin, OUTPUT);
   pinMode(pmp_pin, OUTPUT);
 
