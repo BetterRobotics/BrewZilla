@@ -18,9 +18,7 @@ The program's main features
 - Communication loss detection
 - Uses all existing hardware that comes with the brewzilla 3 with the addition of PI and Arduino
 
-
-
-<b># NOTE:</b> This code is only running on python2.7 at this stage.
+<b># NOTE:</b> This code is only running on python2.7 at this stage, it will be ported to python 3 when necessary.
 
 I will be releasing a full version ready to run with all components needed after my testing is completed. 
 
@@ -56,10 +54,13 @@ Auto reboot will kick in and you should have your program running after the load
 arduino pics for wiring will come shortly or check the brewzilla.ino file for info input / output pins.
 
 
+<b>65L Setup</b>
+If your using a 65L model you will need to change the type setting in the brewzilla.ino file to "#define MODEL 0" then run 
+
+`cd ~/BrewZilla && make clean upload`
 
 
-
-<b>** Trouble shooting</b>
+<b>Trouble shooting</b>
 
 After installation has finished check you can access the arduino via USB:
 
@@ -71,12 +72,6 @@ Next you will need to check the upload of the .ino script to the arudino nano328
 
 ```cd ~/BrewZilla && make clean upload```
 
-Once done and wiring is correct you will have automatic an Brewzilla. 
-
-
-
-
-<b>** 65L Setup</b>
-If your using a 65L model you will need to chnage the type setting in .ino file to "#define MODEL 0" then run `cd ~/BrewZilla && make clean upload`
+Once done and wiring is correct you will have automatic an Brewzilla.
 
 
