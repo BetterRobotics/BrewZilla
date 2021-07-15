@@ -20,7 +20,8 @@ The program's main features
 
 <b># NOTE:</b> This code is only running on python2.7 at this stage, it will be ported to python 3 when necessary.
 
-I will be releasing a full version ready to run with all components needed after my testing is completed. 
+
+<b>Installation Steps</b>
 
 first install git.
 ```
@@ -50,11 +51,11 @@ Setup environment
 ```
 
 Auto reboot will kick in and you should have your program running after the loading screen. 
-
-arduino pics for wiring will come shortly or check the brewzilla.ino file for info input / output pins.
+Arduino pics for wiring will come shortly or check the brewzilla.ino file for info input / output pins.
 
 
 <b>65L Setup</b>
+
 If your using a 65L model you will need to change the type setting in the brewzilla.ino file to "#define MODEL 0" then run 
 
 `cd ~/BrewZilla && make clean upload`
