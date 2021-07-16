@@ -28,7 +28,8 @@ The program's main features
 
 
 
-<b>Installation Steps</b>
+Installation Steps
+----------------------------
 
 first install git.
 ```
@@ -66,7 +67,8 @@ Arduino pics for wiring will come shortly or check the brewzilla.ino file for in
 
 
 
-<b>65L Setup</b>
+65L Setup
+----------------------------
 
 If your using a 65L model you will need to change the type setting in the brewzilla.ino file to:
 
@@ -82,7 +84,8 @@ then run
 
 
 
-<b>Trouble shooting</b>
+Trouble shooting
+----------------------------
 
 After installation has finished check you can access the arduino via USB:
 
