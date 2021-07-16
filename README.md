@@ -45,17 +45,8 @@ cd ~/
 git clone https://github.com/BetterRobotics/BrewZilla.git
 ```
 
-Go to the BrewZilla directory.
 ```
-cd BrewZilla
-```
-Set application actions
-```
-chmod +x install.sh
-```
-Setup environment
-```
-./install.sh
+cd ~/BrewZilla && chmod +x install.sh && ./install.sh
 ```
 
 Auto reboot will kick in and you should have your program running after the loading screen. 
