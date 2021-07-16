@@ -56,7 +56,11 @@ Arduino pics for wiring will come shortly or check the brewzilla.ino file for in
 
 <b>65L Setup</b>
 
-If your using a 65L model you will need to change the type setting in the brewzilla.ino file to "#define MODEL 0" then run 
+If your using a 65L model you will need to change the type setting in the brewzilla.ino file to:
+
+"#define MODEL 0" 
+
+then run 
 
 `cd ~/BrewZilla && make clean upload`
 
