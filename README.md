@@ -8,6 +8,10 @@ If you want to send the recipe wirelessly I suggest placingit in ~/BrewZilla/Rec
 
 ```scp 'file location' pi@"ip address":~/BrewZilla/```
 
+
+
+
+
 The program's main features
 ----------------------------
 - Manual mode timer: which activates after the set temperature is reached
@@ -19,6 +23,9 @@ The program's main features
 - Uses all existing hardware that comes with the brewzilla 3 with the addition of PI and Arduino
 
 <b># NOTE:</b> This code is only running on python2.7 at this stage, it will be ported to python 3 when necessary.
+
+
+
 
 
 <b>Installation Steps</b>
@@ -54,6 +61,11 @@ Auto reboot will kick in and you should have your program running after the load
 Arduino pics for wiring will come shortly or check the brewzilla.ino file for info input / output pins.
 
 
+
+
+
+
+
 <b>65L Setup</b>
 
 If your using a 65L model you will need to change the type setting in the brewzilla.ino file to:
@@ -63,6 +75,11 @@ If your using a 65L model you will need to change the type setting in the brewzi
 then run 
 
 `cd ~/BrewZilla && make clean upload`
+
+
+
+
+
 
 
 <b>Trouble shooting</b>
