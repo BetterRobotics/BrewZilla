@@ -1,33 +1,30 @@
 #define RXD_BUFF_SIZE    6
 #define LOCAL_BUFF_SIZE  2
-#define COM_LOST_TIMEOUT 5 // seconds.
+#define COM_LOST_TIMEOUT 5
+#define step 100
 
-#define brn1_pin 3
-#define brn2_pin 4
-#define brn3_pin 5
+// connection assumes v3.1 brewzilla PCB
+#define brn1_pin 3 // connect to RL1
+#define brn2_pin 4 // connect to RL2
+#define brn3_pin 5 // connect to RL3 ??
 
-#define bzr_pin  A2
-#define pmp_pin  A6
-#define tmp_pin  A0
+#define bzr_pin  A2 // connect to BUZ
+#define tmp_pin  A0 // connect to NYC
 
 //   Brewzilla Model type:
 //   --------------------- 
-//        65L --> MODEL 0   
-//        35L --> MODEL 1 
+//   65L --> MODEL 0   
+//   35L --> MODEL 1 
 
-#define MODEL 1
+#define MODEL 1    // 35L
 
-#define step 100
 
 #include "chords.h"
-
 
 char input_data[] = {'i','i','i','i'};
 int data_count = 0;
 bool RXD_avali_flag = false, rx_lock = false, chord_flag=false;
-
-int brn1=0, brn2=0, brn3_pin=0, bzr=0, a_tmp=0, tmp=0, tmp_set=0, pmp=0;
-
+int brn1=0, brn2=0, brn3=0, bzr=0, a_tmp=0, tmp=0, tmp_set=0;
 double pid_timer=0, rx_timer=0, tx_timer=0, diff=0, bzr_timer=0, brn_timer=0;
 float integral=0., last_error=0.;
 float kp=12.,ki=6.,kd=4.;
@@ -59,7 +56,6 @@ void get_serial(void){
   if(Serial.available() > 0){
     char ReceivedByte;
     ReceivedByte = Serial.read(); // Fetch the received byte value into the variable "ByteReceived"
-    //Serial.print(ReceivedByte); // Echo the received byte back to the computer
     if( ReceivedByte == 'x' ){
       data_count = 0;
       rx_lock = true;
@@ -80,7 +76,6 @@ void get_serial(void){
     data_count++;
   }
 }
-
 
 void set_power(void){
   float output = 0;
@@ -109,19 +104,18 @@ void set_power(void){
     }
   }else{
     if(millis() > brn_timer + 3000){
-      
       if(output > 300){
-        digitalWrite(brn1_pin, LOW);
+        digitalWrite(brn1_pin, HIGH);
         digitalWrite(brn2_pin, HIGH);  //3500
-        igitalWrite(brn3_pin, LOW);
+        digitalWrite(brn3_pin, HIGH);
         brn_timer = millis();
       }else if(output > 250){
         digitalWrite(brn1_pin, LOW);
         digitalWrite(brn2_pin, HIGH);  //3000
-        igitalWrite(brn3_pin, LOW);
+        digitalWrite(brn3_pin, HIGH);
         brn_timer = millis();
       }else if(output > 200){
-        ddigitalWrite(brn1_pin, LOW);
+        digitalWrite(brn1_pin, HIGH);
         digitalWrite(brn2_pin, HIGH);  //2500
         digitalWrite(brn3_pin, LOW);
         brn_timer = millis();
@@ -144,7 +138,6 @@ void set_power(void){
         digitalWrite(brn1_pin, HIGH);
         digitalWrite(brn2_pin, LOW);  // 500
         digitalWrite(brn3_pin, LOW);
-
         brn_timer = millis();
       }else{
         digitalWrite(brn1_pin, LOW);
@@ -155,9 +148,7 @@ void set_power(void){
   }
 }
 
-
 void set_pins(void){
-  digitalWrite(pmp_pin, pmp);
   digitalWrite(bzr_pin, bzr);
 }
 
@@ -173,8 +164,6 @@ void get_temp(void){
   }
   a_tmp = int(idx/(count-1)); 
   
-
-
   //------------------- Calibration -------------------//
   // monitor analog data values to match tmp prob readings
   // tmp = map(a_tmp, Analog Temp A, Analog Temp B, Actual Temp A, Actual Temp B)
@@ -261,14 +250,12 @@ void decode_data(void){
       brn1 = 0;
       brn2 = 0;
       bzr =  0;
-      pmp =  0;
       tmp_set=0;
     }
   }else if (!hbt_ok()){
 		brn1 = 0;
 		brn2 = 0;
 		bzr =  0;
-		pmp =  0;
 		tmp_set=0;
   }
 }
@@ -281,10 +268,8 @@ void setup(void){
   pinMode(brn2_pin, OUTPUT);
   pinMode(brn3_pin, OUTPUT);
   pinMode(bzr_pin, OUTPUT);
-  pinMode(pmp_pin, OUTPUT);
 
   digitalWrite(tmp_pin, LOW);
-  digitalWrite(pmp_pin, LOW);
   digitalWrite(brn1_pin, LOW);
   digitalWrite(brn2_pin, LOW);
 }
@@ -302,5 +287,4 @@ void loop(void){
     send_data();
     tx_timer = millis();
   }
-  //delay(20);
 }
