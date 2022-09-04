@@ -78,13 +78,14 @@ bottom plate in place (the outer set of screws visible from the bottom).
 
 2) Disconnect the LED screen from the control board by detaching the ribbon cable.
 
-3) Wire the arduino to the control board pins, these are clearly labelled on v3.1 and onwards=.
-
+**35L version
 - 3 to RL1
 - 4 to RL2
-- 5 to RL3 (not confirmed)
 - A2 to BUZ
 - A0 to NTC
+
+**65L version
+- TBC
 
 4) Secure Arudno to top of PCB mount with velcro or double sided tape.
 
