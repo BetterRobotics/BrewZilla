@@ -6,7 +6,7 @@ It takes a recipe exported from your favorite beer brewing program and automatic
 
 If you want to send the recipe wirelessly I suggest placingit in ~/BrewZilla/Recipe to as this is the defaut browse location. The wireless option is 
 
-```scp 'file location' pi@"ip address":~/BrewZilla/```
+```scp 'file location' pi@"ip address":~/BrewZilla/Recipes```
 
 
 
