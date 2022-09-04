@@ -71,7 +71,30 @@ then run
 
 
 
+Hardware Installation Steps
+---------------------------
 
+1) Open the Brewzilla's bottom by unfastening the three screws holding the
+bottom plate in place (the outer set of screws visible from the bottom).
+
+2) Disconnect the LED screen from the control board by detaching the ribbon cable.
+
+3) Wire the arduino to the control board pins, these are clearly labelled on v3.1 and onwards=.
+
+- 3 to RL1
+- 4 to RL2
+- 5 to RL3 (not confirmed)
+- A2 to BUZ
+- A0 to NTC
+
+4) Secure Arudno to top of PCB mount with velcro or double sided tape.
+
+5) Close the Brewzilla back up.
+
+Note there is no need to remove the LED screen, but if you do so you could
+set up a more elegant wiring solution, e.g., using CAT5 connectors;
+but you will need to cover the opening left when removing the screen
+in a water-proof manner.
 
 
 
