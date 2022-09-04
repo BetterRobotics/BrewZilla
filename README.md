@@ -78,16 +78,16 @@ bottom plate in place (the outer set of screws visible from the bottom).
 
 2) Disconnect the LED screen from the control board by detaching the ribbon cable.
 
-**35L version
+### 35L version
 - 3 to RL1
 - 4 to RL2
 - A2 to BUZ
 - A0 to NTC
 
-**65L version
-- TBC
+### 65L version
+- TBD
 
-4) Secure Arudno to top of PCB mount with velcro or double sided tape.
+4) Secure Arduino on top of the PCB mount with velcro or double sided tape.
 
 5) Close the Brewzilla back up.
 
