@@ -50,7 +50,6 @@ cd ~/BrewZilla && chmod +x install.sh && ./install.sh
 ```
 
 Auto reboot will kick in and you should have your program running after the loading screen. 
-Arduino pics for wiring will come shortly or check the brewzilla.ino file for info input / output pins.
 
 
 
